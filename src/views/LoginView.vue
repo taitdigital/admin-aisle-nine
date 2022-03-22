@@ -8,15 +8,7 @@ export default {
       return {
         email: '',
         password: '',
-        submitted: ref(false),
-        state: reactive({
-            email: '',
-            password: ''
-        }),
-        rules: {
-            email: { required, email },
-            password: { required }
-        }
+        submitted: ref(false)
       }
     },
     methods: {

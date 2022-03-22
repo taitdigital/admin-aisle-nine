@@ -25,15 +25,33 @@ export default {
 <template>
 <div>
   <header>
-      <nav v-if="currentUser">
-          <RouterLink to="/dashboard" class="nav-link">Dashboard</RouterLink>
-          <RouterLink to="/recipes" class="nav-link">Recipes</RouterLink>
-          <a class="nav-link" href="#" @click="logOut">Logout</a>
-      </nav>
+    <Menubar>
+        <template #start>
+            Aisle 9 Admin
+        </template>
 
-      <nav v-if="!currentUser">
-          <RouterLink to="/login" class="nav-link">Login</RouterLink>
-      </nav>
+        <template>
+            <nav v-if="currentUser">
+                <RouterLink to="/dashboard" class="nav-link">Dashboard</RouterLink>
+                <RouterLink to="/recipes" class="nav-link">Recipes</RouterLink>
+            </nav>
+        </template>
+
+        <template #end>
+          <nav v-if="!currentUser">
+              <RouterLink to="/login" class="nav-link">Login</RouterLink>
+          </nav>
+
+          <nav v-if="currentUser">
+              <a class="nav-link" href="#" @click="logOut">Logout</a>
+          </nav>           
+      </template>
+    </Menubar>
+
+
+
+
+
   </header>
 
   <RouterView />
@@ -42,4 +60,7 @@ export default {
 </template>
 
 <style>
+  body {
+    background: #e3e3e3;
+  }
 </style>
