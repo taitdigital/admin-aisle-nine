@@ -29,9 +29,24 @@ export default {
     const store = useStore()
     const router = useRouter()
 
+    const menuItems = [
+                {
+                   label:'Manage Categories and Ingredients',
+                   icon:'pi pi-fw pi-file',
+                   to: '/dashboard'
+                },
+                {
+                   label:'Manage Recipes',
+                   icon:'pi pi-fw pi-file',
+                   to: '/recipes'
+                }
+            ]
+
     if (!store.state.auth.user) {
         router.push('/');
     }
+
+    return { store, menuItems }
   }
 };
 </script>
@@ -40,19 +55,32 @@ export default {
 <div>
   <Toast />
 
-  <header>
-    <Menubar>
+  <div>
+    <Menubar :model="menuItems">
+        <template #item="{item}">
+            <router-link :to="item.to" custom v-slot="{href, route, navigate, isActive, isExactActive}">
+                <a :href="href" @click="navigate" 
+                class="p-button mr-2 nav-link"
+                :class="{
+                  'active-link p-button': isActive, 
+                  'active-link-exact p-button': isExactActive,
+                  'active-link p-button-outlined': !isActive, 
+                  'active-link-exact p-button-outlined': !isExactActive
+                  }" >{{item.label}}</a>
+            </router-link>
+        </template>
+
         <template #end>
           <nav v-if="!currentUser">
               <RouterLink to="/login" class="nav-link">Login</RouterLink>
           </nav>
 
           <nav v-if="currentUser">
-              <a class="nav-link" href="#" @click="logOut">Logout</a>
+              <a class="nav-link p-button p-button-outlined p-button-secondary" href="#" @click="logOut">Logout</a>
           </nav>           
       </template>
     </Menubar>
-  </header>
+  </div>
 
   <RouterView />
 </div>
@@ -62,5 +90,9 @@ export default {
 <style>
   body {
     background: #e3e3e3;
+  }
+
+  .nav-link {
+    text-decoration: none !important;
   }
 </style>

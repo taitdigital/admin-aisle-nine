@@ -48,29 +48,7 @@
       </div>
 
     </div>
-
-    <div class="grid mt-4">
-
-      <div class="col-12">
-
-          <Card>
-            <template #title>
-                Recipes
-            </template>
-            <template #content>
-                <p>@todo add recipe form in modal</p>
-                <p>@todo list of recipes</p> 
-            </template>
-            <template #footer>
-       
-            </template>
-          </Card>
-
-      </div>
-
-    </div>
-
-
+    
   </div>
 </template>
 

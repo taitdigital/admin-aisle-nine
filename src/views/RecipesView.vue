@@ -1,7 +1,24 @@
 <template>
-  <div class="about">
-    <h1>This is the recipes list</h1>
-  </div>
+    <div class="grid mt-4">
+
+      <div class="col-12">
+
+          <Card>
+            <template #title>
+                Create Recipe
+            </template>
+            <template #content>
+                <p>@todo add recipe form</p>
+                <p>@todo step creator</p> 
+            </template>
+            <template #footer>
+       
+            </template>
+          </Card>
+
+      </div>
+
+    </div>
 </template>
 
 <style>
