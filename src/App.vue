@@ -1,8 +1,12 @@
 <script lang="ts">
 import { RouterLink, RouterView, useRouter } from "vue-router";
 import { useStore } from 'vuex'
+import Toast from 'primevue/toast';
 
 export default {
+  components: {
+    Toast
+  },
   computed: {
     currentUser() {
       return this.$store.state.auth.user;
@@ -34,6 +38,8 @@ export default {
 
 <template>
 <div>
+  <Toast />
+
   <header>
     <Menubar>
         <template #end>

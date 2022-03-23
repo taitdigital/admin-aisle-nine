@@ -1,7 +1,8 @@
 <script lang="ts">
 import { reactive, ref } from 'vue';
-import { required, helpers } from "@vuelidate/validators";
+import { required } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
+import { useToast } from "primevue/usetoast";
 import UploadService from "../../services/upload.service";
 
 export default {
@@ -29,68 +30,65 @@ export default {
                 "name": this.state.name,
                 "description": this.state.description    
             }).then((r) => {
-                console.warn('category created successfully: ', r)
-
-                if (this.image) {
-                    this.uploadImage(r.category_id);
-                } else {
-                    this.$store.dispatch("categories/index").then((data) => {
-                        console.warn('get categories success: ', data)
-                    });
-                }
+                this.$toast.add({severity:'success', summary: 'Category created successfully', detail: r, life: 3000})
+                this.uploadImage(r.category_id);
             },
             (error) => {
-              console.warn(error);
+              console.warn(error)
             })
         },
         handleEdit(id) {
             this.$store.dispatch("categories/edit", { 
-                    id: id, 
-                    payload: { 
-                        "name": this.state.name,
-                        "description": this.state.description
-                    }         
+                id: id, 
+                payload: { 
+                    "name": this.state.name,
+                    "description": this.state.description
+                }         
             }).then((r) => {
-                console.warn('category edited successfully: ', r)
-
-                if (this.image) {
-                    this.uploadImage(r.category_id);
-                } else {
-                    this.$store.dispatch("categories/index").then((data) => {
-                        console.warn('get categories success: ', data)
-                    });
-                }
+                this.$toast.add({severity:'success', summary: 'Category edited successfully', detail: r, life: 3000})
+                this.uploadImage(r.category_id)
             },
             (error) => {
-              console.warn(error);
+              console.warn(error)
             }) 
         },
         uploadImage(id) {
-            UploadService.upload({
-                entity_id: id,
-                entity_type: 'Category',
-                file: this.image
-            }).then((r) => {
-                console.warn('category image uploaded successfully: ', r)
+            if (this.image) {
+                this.$toast.add({severity:'success', summary: 'Uploading image', detail: this.image.name, life: 3000});
 
-                this.$store.dispatch("categories/index").then((data) => {
-                    console.warn('get categories success: ', data)
-                });
-            },
-            (error) => {
-              console.warn(error);
-            })
+                UploadService.upload({
+                    entity_id: id,
+                    entity_type: 'Category',
+                    file: this.image
+                }).then((r) => {
+                    this.$toast.add({severity:'success', summary: 'Category image uploaded successfully', detail: r, life: 3000});
+                    this.clearForm();
+                    this.$store.dispatch("categories/index")
+                },
+                (error) => {
+                    console.warn(error);
+                })
+            } else {
+                this.$store.dispatch("categories/index")
+            }
+        },
+        clearForm() {
+            this.state.name = ''
+            this.state.description = ''
+            this.image = ''
+            this.imagePreview = null
+            this.submitted = false
         },
         imageSelect(event) {
-            this.imagePreview = URL.createObjectURL(event.target.files[0]);
-            this.image = event.target.files[0];
+            this.imagePreview = URL.createObjectURL(event.target.files[0])
+            this.image = event.target.files[0]
         }
     },
     setup(props) {
         const state = reactive({
             name: '',
             description: ''
-        });
+        })
 
         const category_id = (props.existingCategory) ? props.existingCategory.category_id : null;
 

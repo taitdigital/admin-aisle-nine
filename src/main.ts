@@ -14,7 +14,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import FileUpload from 'primevue/fileupload';
-
+import ToastService from 'primevue/toastservice';
 
 import "primevue/resources/themes/saga-blue/theme.css"
 import "primevue/resources/primevue.min.css"
@@ -27,6 +27,7 @@ const app = createApp(App);
 app.use(router);
 app.use(PrimeVue);
 app.use(store);
+app.use(ToastService);
 
 app
     .component('Menubar', Menubar)

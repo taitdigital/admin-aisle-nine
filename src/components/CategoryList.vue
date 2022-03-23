@@ -23,17 +23,13 @@ export default {
     },
     methods: {
         toggleEditDialog(selectedCategory) {
-            console.warn('toggleEditDialog', selectedCategory);
             this.selectedCategory = selectedCategory
             this.displayEdit = !this.displayEdit
         },
         handleDelete(id) {
             this.$store.dispatch("categories/delete", id).then((r) => {
-                console.warn('category deleted successfully: ', r);
-                
-                this.$store.dispatch("categories/index").then((data) => {
-                    console.warn('get categories success: ', data)
-                });
+                this.$toast.add({severity:'success', summary: 'Category deleted successfully', detail: r, life: 3000})
+                this.$store.dispatch("categories/index")
             },
             (error) => {
               console.warn(error);
@@ -44,10 +40,7 @@ export default {
     setup() {
         onMounted(() => {
             const store = useStore()
-
-            store.dispatch("categories/index").then((data) => {
-                console.warn('get categories success: ', data)
-            })
+            store.dispatch("categories/index")
         })
     }
 }
