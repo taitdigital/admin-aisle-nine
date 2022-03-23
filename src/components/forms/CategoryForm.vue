@@ -1,19 +1,19 @@
 <script lang="ts">
 import { reactive, ref } from 'vue';
-import { required } from "@vuelidate/validators";
+import { required, helpers } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
+import UploadService from "../../services/upload.service";
 
 export default {
     props: ['existingCategory'],
     data() {
       return {
+        image: '',
         submitted: ref(false),
       }
     },
     methods: {
         handleSearch() {
-            console.warn(this.state.name);
-
             this.$store.dispatch("categories/search", this.state.name).then((data) => {
                 console.warn('search categories success: ', data)
             });
@@ -29,9 +29,13 @@ export default {
             }).then((r) => {
                 console.warn('category created successfully: ', r)
 
-                this.$store.dispatch("categories/index").then((data) => {
-                    console.warn('get categories success: ', data)
-                });
+                if (this.image) {
+                    this.uploadImage(r.category_id);
+                } else {
+                    this.$store.dispatch("categories/index").then((data) => {
+                        console.warn('get categories success: ', data)
+                    });
+                }
             },
             (error) => {
               console.warn(error);
@@ -54,6 +58,27 @@ export default {
             (error) => {
               console.warn(error);
             }) 
+        },
+        uploadImage(id) {
+            UploadService.upload({
+                entity_id: id,
+                entity_type: 'Category',
+                file: this.image
+            }).then((r) => {
+                console.warn('category image uploaded successfully: ', r)
+
+                this.$store.dispatch("categories/index").then((data) => {
+                    console.warn('get categories success: ', data)
+                });
+            },
+            (error) => {
+              console.warn(error);
+            })
+        },
+        imageSelect(event) {
+            this.image = event.target.files[0];
+
+            console.warn(this.image)
         }
     },
     setup(props) {
@@ -74,7 +99,6 @@ export default {
             description: { required }
         }
 
-
         const v$ = useVuelidate(rules, state);
         return { v$, state, rules, category_id }
     }
@@ -87,15 +111,15 @@ export default {
         <Divider />
         <div class="flex justify-content-center">
             <form @submit.prevent="handleSubmit(!v$.$invalid, category_id)" class="p-fluid">
-                <div class="field pt-2">
+                <div class="field pt-3">
                     <div class="p-float-label p-input-icon-right">
                         <i class="pi pi-search" />
                         <InputText 
-                        id="name"
-                        @input="handleSearch()" 
-                        v-model="v$.name.$model" 
-                        :class="{'p-invalid':v$.name.$invalid && submitted}" 
-                        aria-describedby="name-error"
+                            id="name"
+                            @input="handleSearch()" 
+                            v-model="v$.name.$model" 
+                            :class="{'p-invalid':v$.name.$invalid && submitted}" 
+                            aria-describedby="name-error"
                         />
                         <label for="name" :class="{'p-error':v$.name.$invalid && submitted}">Category Name *</label>
                     </div>
@@ -135,7 +159,19 @@ export default {
                     </small>
                 </div>
                 
-                <Button type="submit" :label="(existingCategory) ? 'Update': 'Create'" class="p-button-rounded" />
+                <img :src="image" />
+
+                <input type="file" v-on:change="imageSelect" />
+
+                <!-- <FileUpload 
+                    mode="basic" 
+                    name="image[]" 
+                    accept="image/*"
+                    
+                    class="p-button-success p-button-rounded p-button-outlined"
+                /> -->
+
+                <Button type="submit" :label="(existingCategory) ? 'Update': 'Create'" class="mt-2 p-button-rounded" />
             </form>
         </div>
         <Divider />

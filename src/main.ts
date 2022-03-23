@@ -13,6 +13,7 @@ import Menubar from 'primevue/menubar';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
+import FileUpload from 'primevue/fileupload';
 
 
 import "primevue/resources/themes/saga-blue/theme.css"
@@ -29,6 +30,7 @@ app.use(store);
 
 app
     .component('Menubar', Menubar)
+    .component('FileUpload', FileUpload)
     .component('Divider', Divider)
     .component('Button', Button)
     .component('Password', Password)

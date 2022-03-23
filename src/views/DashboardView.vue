@@ -18,12 +18,10 @@
       <div class="col-6">
       
           <Card>
-            <template #title>
+            <template #content>
                 <div class="text-lg text-center">
                     Manage Categories
                 </div>
-            </template>
-            <template #content>
                 <CategoryForm />
                 <CategoryList />
             </template>

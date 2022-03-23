@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useStore } from 'vuex'
 import CategoryForm from './forms/CategoryForm.vue';
-
+import { IMG_URL } from '../constants/index';
 
 export default {
     components: {
@@ -10,6 +10,7 @@ export default {
     },
     data() {
         return {
+            imagePath: IMG_URL,
             searchTerm: '',
             displayEdit: false,
             selectedCategory: null
@@ -66,6 +67,11 @@ export default {
                 paginatorTemplate=" FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                 responsiveLayout="scroll"
             >
+                <Column field="image" header="">
+                    <template #body="slotProps">
+                        <img :src="`${imagePath}/${slotProps.data.image}`" width="50"  height="50"/>
+                    </template>
+                </Column>
                 <Column field="name" header="Name"></Column>
                 <Column header="Actions" style="text-align: right;">
                     <template #body="slotProps">

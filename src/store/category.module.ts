@@ -10,7 +10,7 @@ export const categoryStore = {
   state: initialState,
   actions: {
     index({ commit }) {
-      CategoryService.index().then(
+      return CategoryService.index().then(
         categories => {
           commit('getCategoriesSuccess', categories);
           return Promise.resolve(categories);
@@ -22,7 +22,7 @@ export const categoryStore = {
       );
     },
     search({ commit }, searchTerm) {
-      CategoryService.search(searchTerm).then(
+      return CategoryService.search(searchTerm).then(
         categories => {
           commit('getCategoriesSuccess', categories);
           return Promise.resolve(categories);
@@ -34,7 +34,7 @@ export const categoryStore = {
       );
     },
     show({ commit }, id) {
-      CategoryService.show(id).then(
+      return CategoryService.show(id).then(
         category => {
           commit('showCategorySuccess', category);
           return Promise.resolve(category);
@@ -46,7 +46,7 @@ export const categoryStore = {
       );
     },
     create({ commit }, payload) {
-      CategoryService.create(payload).then(
+      return CategoryService.create(payload).then(
         category => {
           commit('createCategorySuccess', category);
           return Promise.resolve(category);
@@ -58,7 +58,7 @@ export const categoryStore = {
       );
     },
     edit({ commit }, {id, payload}) {
-      CategoryService.edit(id, payload).then(
+      return CategoryService.edit(id, payload).then(
         category => {
           commit('editCategorySuccess', category);
           return Promise.resolve(category);
@@ -70,7 +70,7 @@ export const categoryStore = {
       );
     },
     delete({ commit }, id) {
-      CategoryService.delete(id).then(
+      return CategoryService.delete(id).then(
         response => {
           commit('deleteCategorySuccess', response);
           return Promise.resolve(response);
