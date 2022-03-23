@@ -1,12 +1,12 @@
-const API_URL = 'http://localhost:8000/api';
+import { API_URL, getApiToken } from '../constants/index'
 
 class IngredientService {
   index() {
-
     return fetch(API_URL + '/ingredients', {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + getApiToken(),
         }
       })
       .then(response => response.json())
@@ -14,7 +14,30 @@ class IngredientService {
         if (data) {
             localStorage.setItem('ingredients', JSON.stringify(data));
         }
+        return data;
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        return error;
+      });
 
+  }
+
+  search(searchTerm) {
+    return fetch(API_URL + '/ingredients/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + getApiToken(),
+        },
+        body: JSON.stringify({ search: searchTerm })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data) {
+            localStorage.setItem('ingredients', JSON.stringify(data));
+        }
         return data;
       })
       .catch((error) => {
@@ -25,11 +48,11 @@ class IngredientService {
   }
 
   show(id: number) {
-
     return fetch(API_URL + '/ingredients/' + id, {
-        method: 'POST',
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + getApiToken(),        
         },
       })
       .then(response => response.json())
@@ -44,11 +67,12 @@ class IngredientService {
   }
 
   create(payload: any) {
-
     return fetch(API_URL + '/ingredients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + getApiToken(),
         },
         body: JSON.stringify(payload),
       })
@@ -64,11 +88,12 @@ class IngredientService {
   }
 
   edit(id: number, payload: any) {
-
-    return fetch(API_URL + '/ingredients' + id, {
+    return fetch(API_URL + '/ingredients/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + getApiToken(),
         },
         body: JSON.stringify(payload),
       })
@@ -84,11 +109,12 @@ class IngredientService {
   }
 
   delete(id: number) {
-
     return fetch(API_URL + '/ingredients/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + getApiToken(),
         },
         body: JSON.stringify({}),
       })

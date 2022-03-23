@@ -1,15 +1,12 @@
-const API_URL = 'http://localhost:8000/api';
+import { API_URL, getApiToken } from '../constants/index'
 
 class CategoryService {
   index() {
-    const user = localStorage.getItem('user');
-    const BEARER_TOKEN = (user) ? JSON.parse(user).token : null;
-
     return fetch(API_URL + '/categories', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Authorization': 'Bearer ' + BEARER_TOKEN,
+          'Authorization': 'Bearer ' + getApiToken(),
         }
       })
       .then(response => response.json())
@@ -27,15 +24,12 @@ class CategoryService {
   }
 
   search(searchTerm) {
-    const user = localStorage.getItem('user');
-    const BEARER_TOKEN = (user) ? JSON.parse(user).token : null;
-
     return fetch(API_URL + '/categories/search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': 'Bearer ' + BEARER_TOKEN,
+          'Authorization': 'Bearer ' + getApiToken(),
         },
         body: JSON.stringify({ search: searchTerm })
       })
@@ -54,14 +48,12 @@ class CategoryService {
   }
 
   show(id: number) {
-    const user = localStorage.getItem('user');
-    const BEARER_TOKEN = (user) ? JSON.parse(user).token : null;
-
     return fetch(API_URL + '/categories/' + id, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
-          'Authorization': 'Bearer ' + BEARER_TOKEN,        },
+          'Authorization': 'Bearer ' + getApiToken(),        
+        },
       })
       .then(response => response.json())
       .then(data => {
@@ -75,15 +67,12 @@ class CategoryService {
   }
 
   create(payload: any) {
-    const user = localStorage.getItem('user');
-    const BEARER_TOKEN = (user) ? JSON.parse(user).token : null;
-
     return fetch(API_URL + '/categories', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': 'Bearer ' + BEARER_TOKEN,
+          'Authorization': 'Bearer ' + getApiToken(),
         },
         body: JSON.stringify(payload),
       })
@@ -99,15 +88,12 @@ class CategoryService {
   }
 
   edit(id: number, payload: any) {
-    const user = localStorage.getItem('user');
-    const BEARER_TOKEN = (user) ? JSON.parse(user).token : null;
-
     return fetch(API_URL + '/categories/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': 'Bearer ' + BEARER_TOKEN,
+          'Authorization': 'Bearer ' + getApiToken(),
         },
         body: JSON.stringify(payload),
       })
@@ -123,15 +109,12 @@ class CategoryService {
   }
 
   delete(id: number) {
-    const user = localStorage.getItem('user');
-    const BEARER_TOKEN = (user) ? JSON.parse(user).token : null;
-
     return fetch(API_URL + '/categories/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Authorization': 'Bearer ' + BEARER_TOKEN,
+          'Authorization': 'Bearer ' + getApiToken(),
         },
         body: JSON.stringify({}),
       })

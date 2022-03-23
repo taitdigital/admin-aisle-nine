@@ -1,5 +1,5 @@
 <script lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { useStore } from 'vuex'
 import CategoryForm from './forms/CategoryForm.vue';
 import { IMG_URL } from '../constants/index';
@@ -28,7 +28,7 @@ export default {
         },
         handleDelete(id) {
             this.$store.dispatch("categories/delete", id).then((r) => {
-                this.$toast.add({severity:'success', summary: 'Category deleted successfully', detail: r, life: 3000})
+                this.$toast.add({severity:'success', summary: 'Deleted successful', detail: r, life: 3000})
                 this.$store.dispatch("categories/index")
             },
             (error) => {
@@ -57,12 +57,12 @@ export default {
                 :value="categories" 
                 :paginator="true" 
                 :rows="5"
-                paginatorTemplate=" FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
                 responsiveLayout="scroll"
             >
                 <Column field="image" header="">
                     <template #body="slotProps">
-                        <img :src="`${imagePath}/${slotProps.data.image}`" width="50"  height="50"/>
+                        <img v-if="slotProps.data.image" :src="`${imagePath}/${slotProps.data.image}`" width="50"  height="50"/>
                     </template>
                 </Column>
                 <Column field="name" header="Name"></Column>

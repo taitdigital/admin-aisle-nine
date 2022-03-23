@@ -1,11 +1,16 @@
 <script lang="ts">
   import CategoryForm from '../components/forms/CategoryForm.vue';
   import CategoryList from '../components/CategoryList.vue';
+  
+  import IngredientForm from '../components/forms/IngredientForm.vue';
+  import IngredientList from '../components/IngredientList.vue';
 
   export default {
     components: {
       CategoryForm,
-      CategoryList
+      CategoryList,
+      IngredientForm,
+      IngredientList
     }
   }
 </script>
@@ -31,15 +36,12 @@
       <div class="col-6">
       
           <Card>
-            <template #title>
-                Ingredients
-            </template>
             <template #content>
-                <p>@todo add ingredient form</p>
-                <p>@todo list of Ingredients</p> 
-            </template>
-            <template #footer>
-          
+                <div class="text-lg text-center">
+                    Manage Ingredients
+                </div>
+                <IngredientForm />
+                <IngredientList />
             </template>
           </Card>
 
