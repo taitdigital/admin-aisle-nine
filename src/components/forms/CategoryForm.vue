@@ -8,6 +8,7 @@ export default {
     props: ['existingCategory'],
     data() {
       return {
+        imagePreview: null,
         image: '',
         submitted: ref(false),
       }
@@ -19,6 +20,7 @@ export default {
             });
         },
         handleSubmit(isFormValid, id = null) {
+            this.submitted = true;
             if (!isFormValid) { return }
             if (!id) { this.handleCreate() } else { this.handleEdit(id) }
         },
@@ -51,9 +53,13 @@ export default {
             }).then((r) => {
                 console.warn('category edited successfully: ', r)
 
-                this.$store.dispatch("categories/index").then((data) => {
-                    console.warn('get categories success: ', data)
-                });
+                if (this.image) {
+                    this.uploadImage(r.category_id);
+                } else {
+                    this.$store.dispatch("categories/index").then((data) => {
+                        console.warn('get categories success: ', data)
+                    });
+                }
             },
             (error) => {
               console.warn(error);
@@ -76,9 +82,8 @@ export default {
             })
         },
         imageSelect(event) {
+            this.imagePreview = URL.createObjectURL(event.target.files[0]);
             this.image = event.target.files[0];
-
-            console.warn(this.image)
         }
     },
     setup(props) {
@@ -158,22 +163,57 @@ export default {
                         {{v$.name.required.$message.replace('Value', 'Description')}}
                     </small>
                 </div>
-                
-                <img :src="image" />
 
-                <input type="file" v-on:change="imageSelect" />
+                <div class="flex justify-content-end">
+                    <div class="upload-preview">
+                        <img v-if="imagePreview" :src="imagePreview" width="36" height="36"/>
+                    </div>
 
-                <!-- <FileUpload 
-                    mode="basic" 
-                    name="image[]" 
-                    accept="image/*"
-                    
-                    class="p-button-success p-button-rounded p-button-outlined"
-                /> -->
+                    <div class="file-input">
+                        <input type="file" id="file" class="file" v-on:change="imageSelect">
+                        <label for="file" class="p-button p-button-outlined file-button">
+                            <span class="p-button-label" v-if="!image">Upload Image</span>
+                            <span class="p-button-label" v-if="image">{{ image.name }}</span>
+                        </label>
+                    </div>
+                </div>
 
-                <Button type="submit" :label="(existingCategory) ? 'Update': 'Create'" class="mt-2 p-button-rounded" />
+                <Button type="submit" :label="(existingCategory) ? 'Update': 'Create'" class="mt-3 p-button-rounded" />
             </form>
         </div>
         <Divider />
     </div>
 </template>
+
+<style scoped>
+    .file {
+        opacity: 0;
+        width: 0.1px;
+        height: 0.1px;
+        position: absolute;
+    }
+
+    .file-input {
+        width: calc(100% - 40px);
+        margin-left: 4px;
+    }
+    .file-button {
+        width: 100%;
+    }
+
+    .file-button span {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        display: inline-block;
+        text-overflow: ellipsis;
+    }
+
+    .upload-preview {
+        width: 36px;
+        height:36px;
+        overflow: hidden;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+</style>

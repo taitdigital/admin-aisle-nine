@@ -75,19 +75,15 @@ export default {
                 <Column field="name" header="Name"></Column>
                 <Column header="Actions" style="text-align: right;">
                     <template #body="slotProps">
-                        <Button @click="toggleEditDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-pirmary" style="margin-right: 6px;" />
-                        <Button @click="handleDelete(slotProps.data.category_id)" icon="pi pi-trash" class="p-button-rounded p-button-danger" />
+                        <Button @click="toggleEditDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-text p-button-pirmary" style="margin-right: 6px;" />
+                        <Button @click="handleDelete(slotProps.data.category_id)" icon="pi pi-trash" class="p-button-text p-button-danger" />
                     </template>
                 </Column>
             </DataTable>    
         </div>
 
-        <Dialog header="Edit Category" :visible="displayEdit" :style="{width: '50vw'}">
+        <Dialog header="Edit Category" v-model:visible="displayEdit" :style="{width: '50vw'}">
             <CategoryForm :existingCategory="selectedCategory" />
-
-            <template #footer>
-                <Button label="Cancel" icon="pi pi-times" @click="toggleEditDialog" class="p-button-text"/>
-            </template>
         </Dialog>
 	</div>
 </template>
