@@ -1,75 +1,79 @@
 <script lang="ts">
 import { reactive, ref } from 'vue';
-import { required } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import { useToast } from "primevue/usetoast";
-import UploadService from "../../services/upload.service";
+import { required } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
+import UploadService from '../../services/upload.service';
+import { IMG_URL } from '../../constants/index';
 
 export default {
     props: ['existingCategory'],
-    data() {
-      return {
-        imagePreview: null,
-        image: '',
-        submitted: ref(false),
-      }
-    },
     methods: {
+        handleImageSelect(event) {
+            this.imagePreview = URL.createObjectURL(event.target.files[0])
+            this.image = event.target.files[0]
+        },
         handleSearch() {
-            this.$store.dispatch("categories/search", this.state.name).then((data) => {
-                console.warn('search categories success: ', data)
-            });
+            this.$store.dispatch('categories/search', this.state.name)
         },
         handleSubmit(isFormValid, id = null) {
             this.submitted = true;
             if (!isFormValid) { return }
-            if (!id) { this.handleCreate() } else { this.handleEdit(id) }
+            if (!id) { this.create() } else { this.edit(id) }
         },
-        handleCreate() {
-            this.$store.dispatch("categories/create", {
-                "name": this.state.name,
-                "description": this.state.description    
+        create() {
+            this.$store.dispatch('categories/create', {
+                'name': this.state.name,
+                'description': this.state.description    
             }).then((r) => {
-                this.$toast.add({severity:'success', summary: 'Category created successfully', detail: r, life: 3000})
-                this.uploadImage(r.category_id);
+                if (r.errors) {
+                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
+                } else {
+                    this.$toast.add({severity:'success', summary: 'Create success', detail: r, life: 3000})
+                    this.uploadImage(r.category_id);
+                }
             },
             (error) => {
-              console.warn(error)
+                this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
             })
         },
-        handleEdit(id) {
-            this.$store.dispatch("categories/edit", { 
+        edit(id) {
+            this.$store.dispatch('categories/edit', { 
                 id: id, 
                 payload: { 
-                    "name": this.state.name,
-                    "description": this.state.description
+                    'name': this.state.name,
+                    'description': this.state.description
                 }         
             }).then((r) => {
-                this.$toast.add({severity:'success', summary: 'Category edited successfully', detail: r, life: 3000})
-                this.uploadImage(r.category_id)
+                if (r.errors) {
+                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
+                } else {
+                    this.$toast.add({severity:'success', summary: 'Edit success', detail: r, life: 3000})
+                    this.uploadImage(r.category_id)
+                }
+
             },
             (error) => {
-              console.warn(error)
+                this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
             }) 
         },
         uploadImage(id) {
             if (this.image) {
-                this.$toast.add({severity:'success', summary: 'Uploading image', detail: this.image.name, life: 3000});
+                this.$toast.add({severity:'info', summary: 'Uploading image', detail: this.image.name, life: 3000});
 
                 UploadService.upload({
                     entity_id: id,
                     entity_type: 'Category',
                     file: this.image
                 }).then((r) => {
-                    this.$toast.add({severity:'success', summary: 'Category image uploaded successfully', detail: r, life: 3000});
+                    this.$toast.add({severity:'success', summary: 'Upload successful', detail: r, life: 3000});
                     this.clearForm();
-                    this.$store.dispatch("categories/index")
+                    this.$store.dispatch('categories/index')
                 },
                 (error) => {
-                    console.warn(error);
+                    this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
                 })
             } else {
-                this.$store.dispatch("categories/index")
+                this.$store.dispatch('categories/index')
             }
         },
         clearForm() {
@@ -78,13 +82,12 @@ export default {
             this.image = ''
             this.imagePreview = null
             this.submitted = false
-        },
-        imageSelect(event) {
-            this.imagePreview = URL.createObjectURL(event.target.files[0])
-            this.image = event.target.files[0]
         }
     },
     setup(props) {
+        let imagePreview = ''
+        let image = ''
+        const submitted = ref(false)
         const state = reactive({
             name: '',
             description: ''
@@ -95,6 +98,7 @@ export default {
         if (props.existingCategory) {
             state.name = props.existingCategory.name
             state.description = props.existingCategory.description
+            imagePreview = `${IMG_URL}/${props.existingCategory.image}`
         }
 
         const rules: any = {
@@ -103,9 +107,8 @@ export default {
         }
 
         const v$ = useVuelidate(rules, state);
-        return { v$, state, rules, category_id }
+        return { v$, state, rules, category_id, imagePreview, image, submitted }
     }
-    
 }
 </script>
 
@@ -113,7 +116,7 @@ export default {
     <div class="category-form">
         <Divider />
         <div class="flex justify-content-center">
-            <form @submit.prevent="handleSubmit(!v$.$invalid, category_id)" class="p-fluid">
+            <form @submit.prevent="handleSubmit(!v$.$invalid, category_id)" class="p-fluid form-max-width">
                 <div class="field pt-3">
                     <div class="p-float-label p-input-icon-right">
                         <i class="pi pi-search" />
@@ -168,7 +171,7 @@ export default {
                     </div>
 
                     <div class="file-input">
-                        <input type="file" id="file" class="file" v-on:change="imageSelect">
+                        <input type="file" id="file" class="file" v-on:change="handleImageSelect">
                         <label for="file" class="p-button p-button-outlined file-button">
                             <span class="p-button-label" v-if="!image">Upload Image</span>
                             <span class="p-button-label" v-if="image">{{ image.name }}</span>
@@ -184,6 +187,10 @@ export default {
 </template>
 
 <style scoped>
+    .form-max-width {
+        max-width: 266px;
+    }
+
     .file {
         opacity: 0;
         width: 0.1px;
