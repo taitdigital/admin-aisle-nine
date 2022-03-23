@@ -31,6 +31,7 @@
                 <div class="text-lg text-center">
                     Manage Recipes
                 </div>
+                <Divider />
                 <RecipeList />
             </template>
           </Card>

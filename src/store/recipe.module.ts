@@ -21,8 +21,20 @@ export const recipeStore = {
         }
       );
     },
+    search({ commit }, searchTerm) {
+      return RecipeService.search(searchTerm).then(
+        ingredients => {
+          commit('getRecipesSuccess', ingredients);
+          return Promise.resolve(ingredients);
+        },
+        error => {
+          commit('getRecipesFailure');
+          return Promise.reject(error);
+        }
+      );
+    },
     show({ commit }, id) {
-      RecipeService.show(id).then(
+      return RecipeService.show(id).then(
         recipe => {
           commit('showRecipeSuccess', recipe);
           return Promise.resolve(recipe);
@@ -34,7 +46,7 @@ export const recipeStore = {
       );
     },
     create({ commit }, payload) {
-      RecipeService.create(payload).then(
+      return RecipeService.create(payload).then(
         recipe => {
           commit('createRecipeSuccess', recipe);
           return Promise.resolve(recipe);
@@ -46,7 +58,7 @@ export const recipeStore = {
       );
     },
     edit({ commit }, id, payload) {
-      RecipeService.edit(id, payload).then(
+      return RecipeService.edit(id, payload).then(
         recipe => {
           commit('editRecipeSuccess', recipe);
           return Promise.resolve(recipe);
@@ -58,7 +70,7 @@ export const recipeStore = {
       );
     },
     delete({ commit }, id) {
-      RecipeService.delete(id).then(
+      return RecipeService.delete(id).then(
         response => {
           commit('deleteRecipeSuccess', response);
           return Promise.resolve(response);

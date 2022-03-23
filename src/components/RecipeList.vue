@@ -59,7 +59,7 @@ export default {
                 <Column header="Actions" style="text-align: right;">
                     <template #body="slotProps">
                         <Button @click="handleEdit(slotProps.data)" icon="pi pi-pencil" class="p-button-text p-button-pirmary" style="margin-right: 6px;" />
-                        <Button @click="handleDelete(slotProps.data.ingredient_id)" icon="pi pi-trash" class="p-button-text p-button-danger" />
+                        <Button @click="handleDelete(slotProps.data.recipe_id)" icon="pi pi-trash" class="p-button-text p-button-danger" />
                     </template>
                 </Column>
             </DataTable>    

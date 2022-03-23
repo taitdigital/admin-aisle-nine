@@ -73,6 +73,7 @@ export default {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
                 })
             } else {
+                this.clearForm();
                 this.$store.dispatch('recipes/index')
             }
         },
@@ -82,9 +83,11 @@ export default {
             this.image = ''
             this.imagePreview = null
             this.submitted = false
+            this.showSteps = true
         }
     },
     setup(props) {
+        let showSteps = ref(false)
         let imagePreview = ''
         let image = ''
         const submitted = ref(false)
@@ -93,12 +96,13 @@ export default {
             description: ''
         })
 
-        const ingredient_id = (props.existingIngredient) ? props.existingIngredient.ingredient_id : null;
+        const ingredient_id = (props.existingRecipe) ? props.existingRecipe.recipe_id : null;
 
-        if (props.existingIngredient) {
-            state.name = props.existingIngredient.name
-            state.description = props.existingIngredient.description
-            imagePreview = `${IMG_URL}/${props.existingIngredient.image}`
+        if (props.existingRecipe) {
+            state.name = props.existingRecipe.name
+            state.description = props.existingRecipe.description
+            imagePreview = `${IMG_URL}/${props.existingRecipe.image}`
+            showSteps.value = true
         }
 
         const rules: any = {
@@ -107,7 +111,7 @@ export default {
         }
 
         const v$ = useVuelidate(rules, state);
-        return { v$, state, rules, ingredient_id, imagePreview, image, submitted }
+        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, showSteps }
     }
 }
 </script>
@@ -115,7 +119,7 @@ export default {
 <template>
     <div class="recipe-form">
         <Divider />
-        <div class="flex justify-content-center">
+        <div>
             <form @submit.prevent="handleSubmit(!v$.$invalid, ingredient_id)" class="p-fluid form-max-width">
                 <div class="field pt-3">
                     <div class="p-float-label p-input-icon-right">
@@ -179,10 +183,15 @@ export default {
                     </div>
                 </div>
 
-                <Button type="submit" :label="(existingIngredient) ? 'Update': 'Create'" class="mt-3 p-button-rounded" />
+                <Button type="submit" v-if="!existingRecipe || !showSteps" :label="'Create'" class="mt-3 p-button-rounded" />
             </form>
+
+            <div v-if="showSteps">
+                <Divider />
+                <p>@todo create steps</p>
+                <Divider />
+            </div>
         </div>
-        <Divider />
     </div>
 </template>
 

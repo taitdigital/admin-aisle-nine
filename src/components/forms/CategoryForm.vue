@@ -73,6 +73,7 @@ export default {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
                 })
             } else {
+                this.clearForm();
                 this.$store.dispatch('categories/index')
             }
         },
