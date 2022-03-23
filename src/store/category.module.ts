@@ -21,8 +21,8 @@ export const categoryStore = {
         }
       );
     },
-    search({ commit }) {
-      CategoryService.search().then(
+    search({ commit }, searchTerm) {
+      CategoryService.search(searchTerm).then(
         categories => {
           commit('getCategoriesSuccess', categories);
           return Promise.resolve(categories);

@@ -8,8 +8,8 @@ class CategoryService {
     return fetch(API_URL + '/categories', {
         method: 'GET',
         headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + BEARER_TOKEN,
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + BEARER_TOKEN,
         }
       })
       .then(response => response.json())
@@ -31,11 +31,13 @@ class CategoryService {
     const BEARER_TOKEN = (user) ? JSON.parse(user).token : null;
 
     return fetch(API_URL + '/categories/search', {
-        method: 'GET',
+        method: 'POST',
         headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + BEARER_TOKEN,
-        }
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + BEARER_TOKEN,
+        },
+        body: JSON.stringify({ search: searchTerm })
       })
       .then(response => response.json())
       .then(data => {
@@ -58,8 +60,8 @@ class CategoryService {
     return fetch(API_URL + '/categories/' + id, {
         method: 'GET',
         headers: {
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + BEARER_TOKEN,        },
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + BEARER_TOKEN,        },
       })
       .then(response => response.json())
       .then(data => {
@@ -104,8 +106,8 @@ class CategoryService {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: 'Bearer ' + BEARER_TOKEN,
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + BEARER_TOKEN,
         },
         body: JSON.stringify(payload),
       })

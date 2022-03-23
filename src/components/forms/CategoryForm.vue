@@ -11,6 +11,13 @@ export default {
       }
     },
     methods: {
+        handleSearch() {
+            console.warn(this.state.name);
+
+            this.$store.dispatch("categories/search", this.state.name).then((data) => {
+                console.warn('search categories success: ', data)
+            });
+        },
         handleSubmit(isFormValid, id = null) {
             if (!isFormValid) { return }
             if (!id) { this.handleCreate() } else { this.handleEdit(id) }
@@ -77,12 +84,15 @@ export default {
 
 <template>
     <div class="category-form">
+        <Divider />
         <div class="flex justify-content-center">
             <form @submit.prevent="handleSubmit(!v$.$invalid, category_id)" class="p-fluid">
-                <div class="field">
-                    <div class="p-float-label">
+                <div class="field pt-2">
+                    <div class="p-float-label p-input-icon-right">
+                        <i class="pi pi-search" />
                         <InputText 
-                        id="name" 
+                        id="name"
+                        @input="handleSearch()" 
                         v-model="v$.name.$model" 
                         :class="{'p-invalid':v$.name.$invalid && submitted}" 
                         aria-describedby="name-error"
@@ -101,14 +111,14 @@ export default {
                     </small>
                 </div>
 
-                <div class="field">
+                <div class="field pt-3">
                     <div class="p-float-label">
                         <Textarea id="description" 
                             v-model="v$.description.$model" 
                             :class="{'p-invalid':v$.description.$invalid && submitted}" 
                             aria-describedby="description-error" 
                             :autoResize="true" 
-                            rows="5" 
+                            rows="3" 
                             cols="30" 
                         />
                         <label for="description" :class="{'p-error':v$.description.$invalid && submitted}">Category Description *</label>
@@ -125,8 +135,9 @@ export default {
                     </small>
                 </div>
                 
-                <Button type="submit" :label="(existingCategory) ? 'Update': 'Create'" class="mt-2" />
+                <Button type="submit" :label="(existingCategory) ? 'Update': 'Create'" class="p-button-rounded" />
             </form>
         </div>
+        <Divider />
     </div>
 </template>

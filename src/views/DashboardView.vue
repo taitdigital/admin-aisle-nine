@@ -13,25 +13,24 @@
 
 <template>
   <div class="dashboard">
-    <br /><br />
-    <div class="grid">
-      <div class="col">
+
+    <div class="grid mt-4">
+      <div class="col-6">
       
           <Card>
             <template #title>
-                Categories
+                <div class="text-lg text-center">
+                    Manage Categories
+                </div>
             </template>
             <template #content>
                 <CategoryForm />
                 <CategoryList />
             </template>
-            <template #footer>
-           
-            </template>
           </Card>
       
       </div>
-      <div class="col">
+      <div class="col-6">
       
           <Card>
             <template #title>
@@ -47,7 +46,12 @@
           </Card>
 
       </div>
-      <div class="col">
+
+    </div>
+
+    <div class="grid mt-4">
+
+      <div class="col-12">
 
           <Card>
             <template #title>
@@ -63,6 +67,7 @@
           </Card>
 
       </div>
+
     </div>
 
 

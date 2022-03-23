@@ -1,5 +1,6 @@
 <script lang="ts">
-import { RouterLink, RouterView } from "vue-router";
+import { RouterLink, RouterView, useRouter } from "vue-router";
+import { useStore } from 'vuex'
 
 export default {
   computed: {
@@ -15,8 +16,17 @@ export default {
   },
   methods: {
     logOut() {
-      this.$store.dispatch('auth/logout');
-      this.$router.push('/login');
+      this.$store.dispatch('auth/logout').then(() => {
+        this.$router.push('/');
+      });
+    }
+  },
+  setup() {
+    const store = useStore()
+    const router = useRouter()
+
+    if (!store.state.auth.user) {
+        router.push('/');
     }
   }
 };
@@ -26,17 +36,6 @@ export default {
 <div>
   <header>
     <Menubar>
-        <template #start>
-            Aisle 9 Admin
-        </template>
-
-        <template>
-            <nav v-if="currentUser">
-                <RouterLink to="/dashboard" class="nav-link">Dashboard</RouterLink>
-                <RouterLink to="/recipes" class="nav-link">Recipes</RouterLink>
-            </nav>
-        </template>
-
         <template #end>
           <nav v-if="!currentUser">
               <RouterLink to="/login" class="nav-link">Login</RouterLink>
@@ -47,11 +46,6 @@ export default {
           </nav>           
       </template>
     </Menubar>
-
-
-
-
-
   </header>
 
   <RouterView />

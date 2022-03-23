@@ -54,35 +54,27 @@ export default {
 
 <template>
 	<div>
-        <div class="flex justify-content-center">
-            <span class="p-input-icon-left">
-                <i class="pi pi-search" />
-                <InputText type="text" v-model="searchTerm" placeholder="Search" />
-            </span>
+        <div v-if="!categories.length">
+            <h3>No results</h3>
+            <Divider />
         </div>
-        <DataTable 
-            :value="categories" 
-            :paginator="true" 
-            :rows="5"
-            paginatorTemplate=" FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink"
-            responsiveLayout="scroll"
-        >
-            <Column field="name" header="Name"></Column>
-            <Column header="Actions">
-
-                <template #body="slotProps">
-                    <Button @click="toggleEditDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-pirmary" style="margin-right: 6px;" />
-                    <Button @click="handleDelete(slotProps.data.category_id)" icon="pi pi-trash" class="p-button-rounded p-button-danger" />
-                </template>
-            </Column>
-
-            <template #paginatorstart>
-                <Button type="button" icon="pi pi-refresh" class="p-button-text" />
-            </template>
-            <template #paginatorend>
-                <Button type="button" icon="pi pi-cloud" class="p-button-text" />
-            </template>
-        </DataTable>    
+        <div v-if="categories.length">
+            <DataTable 
+                :value="categories" 
+                :paginator="true" 
+                :rows="5"
+                paginatorTemplate=" FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                responsiveLayout="scroll"
+            >
+                <Column field="name" header="Name"></Column>
+                <Column header="Actions" style="text-align: right;">
+                    <template #body="slotProps">
+                        <Button @click="toggleEditDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-rounded p-button-pirmary" style="margin-right: 6px;" />
+                        <Button @click="handleDelete(slotProps.data.category_id)" icon="pi pi-trash" class="p-button-rounded p-button-danger" />
+                    </template>
+                </Column>
+            </DataTable>    
+        </div>
 
         <Dialog header="Edit Category" :visible="displayEdit" :style="{width: '50vw'}">
             <CategoryForm :existingCategory="selectedCategory" />

@@ -54,14 +54,14 @@ export default {
     <div class="login-form">
         <div class="flex justify-content-center">
             <div class="card">
-                <h5 class="text-center">Login</h5>
+                <h1 class="text-center">Login</h1>
 
                 <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-fluid">
                     <div class="field">
-                        <div class="p-float-label p-input-icon-right">
+                        <div class="p-input-icon-right">
+                            <label for="email" :class="{'p-error':v$.email.$invalid && submitted}">Email*</label>
                             <i class="pi pi-envelope" />
                             <InputText id="email" v-model="v$.email.$model" :class="{'p-invalid':v$.email.$invalid && submitted}" aria-describedby="email-error"/>
-                            <label for="email" :class="{'p-error':v$.email.$invalid && submitted}">Email*</label>
                         </div>
 
                         <span v-if="v$.email.$error && submitted">
@@ -76,9 +76,9 @@ export default {
                     </div>
                     
                     <div class="field">
-                        <div class="p-float-label">
-                            <Password id="password" :feedback="false" v-model="v$.password.$model" :class="{'p-invalid':v$.password.$invalid && submitted}" /> 
+                        <div>
                             <label for="password" :class="{'p-error':v$.password.$invalid && submitted}">Password*</label>
+                            <Password id="password" :feedback="false" v-model="v$.password.$model" :class="{'p-invalid':v$.password.$invalid && submitted}" /> 
                         </div>
 
                         <small v-if="(v$.password.$invalid && submitted) || v$.password.$pending.$response" class="p-error">

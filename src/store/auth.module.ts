@@ -25,6 +25,7 @@ export const auth = {
     },
     logout({ commit }) {
       AuthService.logout();
+      localStorage.removeItem('user');
       commit('logout');
     }
   },

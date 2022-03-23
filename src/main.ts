@@ -17,8 +17,9 @@ import Divider from 'primevue/divider';
 
 import "primevue/resources/themes/saga-blue/theme.css"
 import "primevue/resources/primevue.min.css"
-import "primeflex/primeflex.css";          
-import "primeicons/primeicons.css"                        
+import "primeflex/primeflex.css"        
+import "primeicons/primeicons.css"   
+import "./global-styles.css"                     
 
 const app = createApp(App);
 
