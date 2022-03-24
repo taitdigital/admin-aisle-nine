@@ -11,6 +11,8 @@ export default {
         handleImageSelect(event) {
             this.imagePreview = URL.createObjectURL(event.target.files[0])
             this.image = event.target.files[0]
+
+            console.warn('handleImageSelect', this.imagePreview);
         },
         handleSearch() {
             this.$store.dispatch('categories/search', this.state.name)
@@ -58,9 +60,11 @@ export default {
         },
         uploadImage(id) {
             if (this.image) {
-                this.$toast.add({severity:'info', summary: 'Uploading image', detail: this.image.name, life: 3000});
+                const uploadService = new UploadService();
 
-                UploadService.upload({
+                this.$toast.add({severity:'info', summary: 'Uploading image', detail: this.image.name, life: 3000});
+                
+                uploadService.upload({
                     entity_id: id,
                     entity_type: 'Category',
                     file: this.image
@@ -86,7 +90,7 @@ export default {
         }
     },
     setup(props) {
-        let imagePreview = ''
+        let imagePreview = ref('')
         let image = ''
         const submitted = ref(false)
         const state = reactive({
@@ -168,12 +172,14 @@ export default {
 
                 <div class="flex justify-content-end">
                     <div class="upload-preview">
-                        <img v-if="imagePreview" :src="imagePreview" width="36" height="36"/>
+                        <span v-if="imagePreview">
+                            <img :src="imagePreview" width="36" height="36"/>
+                        </span>
                     </div>
 
                     <div class="file-input">
-                        <input type="file" id="file" class="file" v-on:change="handleImageSelect">
-                        <label for="file" class="p-button p-button-outlined file-button">
+                        <input type="file" id="file-category" class="file" v-on:change="handleImageSelect">
+                        <label for="file-category" class="p-button p-button-outlined file-button">
                             <span class="p-button-label" v-if="!image">Upload Image</span>
                             <span class="p-button-label" v-if="image">{{ image.name }}</span>
                         </label>

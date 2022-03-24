@@ -58,9 +58,10 @@ export default {
         },
         uploadImage(id) {
             if (this.image) {
+                const uploadService = new UploadService();
                 this.$toast.add({severity:'info', summary: 'Uploading image', detail: this.image.name, life: 3000});
 
-                UploadService.upload({
+                uploadService.upload({
                     entity_id: id,
                     entity_type: 'Ingredient',
                     file: this.image
@@ -86,7 +87,7 @@ export default {
         }
     },
     setup(props) {
-        let imagePreview = ''
+        let imagePreview = ref('')
         let image = ''
         const submitted = ref(false)
         const state = reactive({
@@ -168,12 +169,14 @@ export default {
 
                 <div class="flex justify-content-end">
                     <div class="upload-preview">
-                        <img v-if="imagePreview" :src="imagePreview" width="36" height="36"/>
+                        <span v-if="imagePreview">
+                            <img :src="imagePreview" width="36" height="36"/>
+                        </span>                    
                     </div>
 
                     <div class="file-input">
-                        <input type="file" id="file" class="file" v-on:change="handleImageSelect">
-                        <label for="file" class="p-button p-button-outlined file-button">
+                        <input type="file" id="file-ingredient" class="file" v-on:change="handleImageSelect">
+                        <label for="file-ingredient" class="p-button p-button-outlined file-button">
                             <span class="p-button-label" v-if="!image">Upload Image</span>
                             <span class="p-button-label" v-if="image">{{ image.name }}</span>
                         </label>

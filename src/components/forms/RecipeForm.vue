@@ -1,9 +1,10 @@
 <script lang="ts">
-import { reactive, ref } from 'vue';
-import { required } from '@vuelidate/validators';
-import { useVuelidate } from '@vuelidate/core';
-import UploadService from '../../services/upload.service';
-import { IMG_URL } from '../../constants/index';
+import { reactive, ref, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
+import { required } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
+import UploadService from '../../services/upload.service'
+import { IMG_URL } from '../../constants/index'
 
 export default {
     props: ['existingRecipe'],
@@ -19,6 +20,16 @@ export default {
             this.submitted = true;
             if (!isFormValid) { return }
             if (!id) { this.create() } else { this.edit(id) }
+        },
+        searchCategories(searchTerm) {
+            this.$store.dispatch('categories/search', searchTerm.query).then(() => {
+                this.filteredCategories = this.$store.state.categories.categories.map(c => ({ 'label': c.name, 'value': c.category_id }))
+            })
+        },
+        searchIngredients(searchTerm) {
+            this.$store.dispatch('ingredients/search', searchTerm.query).then(() => {
+                this.filteredIngredients = this.$store.state.ingredients.ingredients.map(i => ({ 'label': i.name, 'value': i.ingredient_id }))
+            })
         },
         create() {
             this.$store.dispatch('recipes/create', {
@@ -58,9 +69,10 @@ export default {
         },
         uploadImage(id) {
             if (this.image) {
+                const uploadService = new UploadService();
                 this.$toast.add({severity:'info', summary: 'Uploading image', detail: this.image.name, life: 3000});
 
-                UploadService.upload({
+                uploadService.upload({
                     entity_id: id,
                     entity_type: 'Recipe',
                     file: this.image
@@ -86,14 +98,30 @@ export default {
             this.showSteps = true
         }
     },
+    mounted() {
+            this.$store.dispatch("categories/index").then(() => {
+                this.filteredCategories = this.$store.state.categories.categories.map(c => ({ 'label': c.name, 'value': c.category_id }))
+            })
+            this.$store.dispatch("ingredients/index").then(() => {
+                this.filteredIngredients = this.$store.state.ingredients.ingredients.map(i => ({ 'label': i.name, 'value': i.ingredient_id }))
+            })
+    },
     setup(props) {
+        const store = useStore()
+        
         let showSteps = ref(false)
-        let imagePreview = ''
+        let imagePreview = ref('')
         let image = ''
         const submitted = ref(false)
+
+        const filteredCategories = ref([])
+        const filteredIngredients = ref([])
+
         const state = reactive({
             name: '',
-            description: ''
+            description: '',
+            ingredients: [],
+            category: null
         })
 
         const ingredient_id = (props.existingRecipe) ? props.existingRecipe.recipe_id : null;
@@ -107,11 +135,13 @@ export default {
 
         const rules: any = {
             name: { required },
-            description: { required }
+            description: { required },
+            ingredients: { required },
+            category: { required }
         }
 
         const v$ = useVuelidate(rules, state);
-        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, showSteps }
+        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, showSteps, filteredCategories, filteredIngredients }
     }
 }
 </script>
@@ -171,16 +201,52 @@ export default {
 
                 <div class="flex justify-content-end">
                     <div class="upload-preview">
-                        <img v-if="imagePreview" :src="imagePreview" width="36" height="36"/>
+                        <span v-if="imagePreview">
+                            <img :src="imagePreview" width="36" height="36"/>
+                        </span>                    
                     </div>
 
                     <div class="file-input">
-                        <input type="file" id="file" class="file" v-on:change="handleImageSelect">
-                        <label for="file" class="p-button p-button-outlined file-button">
+                        <input type="file" id="file-recipe" class="file" v-on:change="handleImageSelect">
+                        <label for="file-recipe" class="p-button p-button-outlined file-button">
                             <span class="p-button-label" v-if="!image">Upload Image</span>
                             <span class="p-button-label" v-if="image">{{ image.name }}</span>
                         </label>
                     </div>
+                </div>
+
+                <div class="field pt-5">
+                    <div class="p-float-label">
+                        <AutoComplete v-model="v$.category.$model" :virtualScrollerOptions="{ itemSize: 31 }" dropdown :suggestions="filteredCategories" @complete="searchCategories($event)" field="label" id="category" />
+                        <label for="category" :class="{'p-error':v$.category.$invalid && submitted}">Category *</label>
+                    </div>
+
+                    <span v-if="v$.category.$error && submitted">
+                        <span id="category-error" v-for="(error, index) of v$.category.$errors" :key="index">
+                        <small class="p-error">{{error.$message}}</small>
+                        </span>
+                    </span>
+
+                    <small v-else-if="(v$.category.$invalid && submitted) || v$.category.$pending.$response" class="p-error">
+                        {{v$.category.required.$message.replace('Value', 'Category')}}
+                    </small>
+                </div>
+
+                <div class="field pt-5">
+                    <div class="p-float-label">
+                        <AutoComplete :multiple="true" v-model="v$.ingredients.$model" :suggestions="filteredIngredients" dropdown @complete="searchIngredients($event)" field="label" />
+                        <label for="category" :class="{'p-error':v$.category.$invalid && submitted}">Ingredients *</label>
+                    </div>
+
+                    <span v-if="v$.ingredients.$error && submitted">
+                        <span id="category-error" v-for="(error, index) of v$.ingredients.$errors" :key="index">
+                        <small class="p-error">{{error.$message}}</small>
+                        </span>
+                    </span>
+
+                    <small v-else-if="(v$.ingredients.$invalid && submitted) || v$.ingredients.$pending.$response" class="p-error">
+                        {{v$.ingredients.required.$message.replace('Value', 'Ingredients')}}
+                    </small>
                 </div>
 
                 <Button type="submit" v-if="!existingRecipe || !showSteps" :label="'Create'" class="mt-3 p-button-rounded" />

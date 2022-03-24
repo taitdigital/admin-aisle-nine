@@ -1,8 +1,8 @@
 <script lang="ts">
-import { onMounted } from 'vue';
+import { onMounted } from 'vue'
 import { useStore } from 'vuex'
-import CategoryForm from './forms/CategoryForm.vue';
-import { IMG_URL } from '../constants/index';
+import CategoryForm from './forms/CategoryForm.vue'
+import { IMG_URL } from '../constants/index'
 
 export default {
     components: {

@@ -14,6 +14,8 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import ToastService from 'primevue/toastservice';
+import AutoComplete from 'primevue/autocomplete';
+
 
 import "primevue/resources/themes/saga-blue/theme.css"
 import "primevue/resources/primevue.min.css"
@@ -30,6 +32,7 @@ app.use(ToastService);
 
 app
     .component('Menubar', Menubar)
+    .component('AutoComplete', AutoComplete)
     .component('Divider', Divider)
     .component('Button', Button)
     .component('Password', Password)
