@@ -149,114 +149,126 @@ export default {
 <template>
     <div class="recipe-form">
         <Divider />
-        <div>
-            <form @submit.prevent="handleSubmit(!v$.$invalid, ingredient_id)" class="p-fluid form-max-width">
-                <div class="field pt-3">
-                    <div class="p-float-label p-input-icon-right">
-                        <i class="pi pi-search" />
-                        <InputText 
-                            id="name"
-                            @input="handleSearch()" 
-                            v-model="v$.name.$model" 
-                            :class="{'p-invalid':v$.name.$invalid && submitted}" 
-                            aria-describedby="name-error"
-                        />
-                        <label for="name" :class="{'p-error':v$.name.$invalid && submitted}">Recipe Name *</label>
-                    </div>
 
-                    <span v-if="v$.name.$error && submitted">
-                        <span id="name-error" v-for="(error, index) of v$.name.$errors" :key="index">
-                        <small class="p-error">{{error.$message}}</small>
+        <div class="flex">
+            <div>
+            
+                <form @submit.prevent="handleSubmit(!v$.$invalid, ingredient_id)" class="p-fluid form-max-width">
+                    <div class="field pt-3">
+                        <div class="p-float-label p-input-icon-right">
+                            <i class="pi pi-search" />
+                            <InputText 
+                                id="name"
+                                @input="handleSearch()" 
+                                v-model="v$.name.$model" 
+                                :class="{'p-invalid':v$.name.$invalid && submitted}" 
+                                aria-describedby="name-error"
+                            />
+                            <label for="name" :class="{'p-error':v$.name.$invalid && submitted}">Recipe Name *</label>
+                        </div>
+
+                        <span v-if="v$.name.$error && submitted">
+                            <span id="name-error" v-for="(error, index) of v$.name.$errors" :key="index">
+                            <small class="p-error">{{error.$message}}</small>
+                            </span>
                         </span>
-                    </span>
 
-                    <small v-else-if="(v$.name.$invalid && submitted) || v$.name.$pending.$response" class="p-error">
-                        {{v$.name.required.$message.replace('Value', 'Name')}}
-                    </small>
-                </div>
-
-                <div class="field pt-3">
-                    <div class="p-float-label">
-                        <Textarea id="description" 
-                            v-model="v$.description.$model" 
-                            :class="{'p-invalid':v$.description.$invalid && submitted}" 
-                            aria-describedby="description-error" 
-                            :autoResize="true" 
-                            rows="3" 
-                            cols="30" 
-                        />
-                        <label for="description" :class="{'p-error':v$.description.$invalid && submitted}">Recipe Description *</label>
+                        <small v-else-if="(v$.name.$invalid && submitted) || v$.name.$pending.$response" class="p-error">
+                            {{v$.name.required.$message.replace('Value', 'Name')}}
+                        </small>
                     </div>
 
-                    <span v-if="v$.description.$error && submitted">
-                        <span id="description-error" v-for="(error, index) of v$.description.$errors" :key="index">
-                        <small class="p-error">{{error.$message}}</small>
+                    <div class="field pt-3">
+                        <div class="p-float-label">
+                            <Textarea id="description" 
+                                v-model="v$.description.$model" 
+                                :class="{'p-invalid':v$.description.$invalid && submitted}" 
+                                aria-describedby="description-error" 
+                                :autoResize="true" 
+                                rows="3" 
+                                cols="30" 
+                            />
+                            <label for="description" :class="{'p-error':v$.description.$invalid && submitted}">Recipe Description *</label>
+                        </div>
+
+                        <span v-if="v$.description.$error && submitted">
+                            <span id="description-error" v-for="(error, index) of v$.description.$errors" :key="index">
+                            <small class="p-error">{{error.$message}}</small>
+                            </span>
                         </span>
-                    </span>
 
-                    <small v-else-if="(v$.description.$invalid && submitted) || v$.description.$pending.$response" class="p-error">
-                        {{v$.name.required.$message.replace('Value', 'Description')}}
-                    </small>
-                </div>
-
-                <div class="flex justify-content-end">
-                    <div class="upload-preview">
-                        <span v-if="imagePreview">
-                            <img :src="imagePreview" width="36" height="36"/>
-                        </span>                    
+                        <small v-else-if="(v$.description.$invalid && submitted) || v$.description.$pending.$response" class="p-error">
+                            {{v$.name.required.$message.replace('Value', 'Description')}}
+                        </small>
                     </div>
 
-                    <div class="file-input">
-                        <input type="file" id="file-recipe" class="file" v-on:change="handleImageSelect">
-                        <label for="file-recipe" class="p-button p-button-outlined file-button">
-                            <span class="p-button-label" v-if="!image">Upload Image</span>
-                            <span class="p-button-label" v-if="image">{{ image.name }}</span>
-                        </label>
-                    </div>
-                </div>
+                    <div class="flex justify-content-end">
+                        <div class="upload-preview">
+                            <span v-if="imagePreview">
+                                <img :src="imagePreview" width="36" height="36"/>
+                            </span>                    
+                        </div>
 
-                <div class="field pt-5">
-                    <div class="p-float-label">
-                        <AutoComplete v-model="v$.category.$model" :virtualScrollerOptions="{ itemSize: 31 }" dropdown :suggestions="filteredCategories" @complete="searchCategories($event)" field="label" id="category" />
-                        <label for="category" :class="{'p-error':v$.category.$invalid && submitted}">Category *</label>
+                        <div class="file-input">
+                            <input type="file" id="file-recipe" class="file" v-on:change="handleImageSelect">
+                            <label for="file-recipe" class="p-button p-button-outlined file-button">
+                                <span class="p-button-label" v-if="!image">Upload Image</span>
+                                <span class="p-button-label" v-if="image">{{ image.name }}</span>
+                            </label>
+                        </div>
                     </div>
 
-                    <span v-if="v$.category.$error && submitted">
-                        <span id="category-error" v-for="(error, index) of v$.category.$errors" :key="index">
-                        <small class="p-error">{{error.$message}}</small>
+                    <div class="field pt-5">
+                        <div class="p-float-label">
+                            <AutoComplete v-model="v$.category.$model" :virtualScrollerOptions="{ itemSize: 31 }" dropdown :suggestions="filteredCategories" @complete="searchCategories($event)" field="label" id="category" />
+                            <label for="category" :class="{'p-error':v$.category.$invalid && submitted}">Category *</label>
+                        </div>
+
+                        <span v-if="v$.category.$error && submitted">
+                            <span id="category-error" v-for="(error, index) of v$.category.$errors" :key="index">
+                            <small class="p-error">{{error.$message}}</small>
+                            </span>
                         </span>
-                    </span>
 
-                    <small v-else-if="(v$.category.$invalid && submitted) || v$.category.$pending.$response" class="p-error">
-                        {{v$.category.required.$message.replace('Value', 'Category')}}
-                    </small>
-                </div>
-
-                <div class="field pt-5">
-                    <div class="p-float-label">
-                        <AutoComplete :multiple="true" v-model="v$.ingredients.$model" :suggestions="filteredIngredients" dropdown @complete="searchIngredients($event)" field="label" />
-                        <label for="category" :class="{'p-error':v$.category.$invalid && submitted}">Ingredients *</label>
+                        <small v-else-if="(v$.category.$invalid && submitted) || v$.category.$pending.$response" class="p-error">
+                            {{v$.category.required.$message.replace('Value', 'Category')}}
+                        </small>
                     </div>
 
-                    <span v-if="v$.ingredients.$error && submitted">
-                        <span id="category-error" v-for="(error, index) of v$.ingredients.$errors" :key="index">
-                        <small class="p-error">{{error.$message}}</small>
+                    <div class="field pt-5">
+                        <div class="p-float-label">
+                            <AutoComplete :multiple="true" v-model="v$.ingredients.$model" :suggestions="filteredIngredients" dropdown @complete="searchIngredients($event)" field="label" />
+                            <label for="category" :class="{'p-error':v$.category.$invalid && submitted}">Ingredients *</label>
+                        </div>
+
+                        <span v-if="v$.ingredients.$error && submitted">
+                            <span id="category-error" v-for="(error, index) of v$.ingredients.$errors" :key="index">
+                            <small class="p-error">{{error.$message}}</small>
+                            </span>
                         </span>
-                    </span>
 
-                    <small v-else-if="(v$.ingredients.$invalid && submitted) || v$.ingredients.$pending.$response" class="p-error">
-                        {{v$.ingredients.required.$message.replace('Value', 'Ingredients')}}
-                    </small>
-                </div>
+                        <small v-else-if="(v$.ingredients.$invalid && submitted) || v$.ingredients.$pending.$response" class="p-error">
+                            {{v$.ingredients.required.$message.replace('Value', 'Ingredients')}}
+                        </small>
+                    </div>
 
-                <Button type="submit" v-if="!existingRecipe || !showSteps" :label="'Create'" class="mt-3 p-button-rounded" />
-            </form>
-
-            <div v-if="showSteps">
-                <Divider />
-                <p>@todo create steps</p>
-                <Divider />
+                    <Button type="submit" v-if="!existingRecipe || !showSteps" :label="'Create'" class="mt-3 p-button-rounded" />
+                </form>
+            
             </div>
+            <Divider layout="vertical" align="left" v-if="showSteps" />
+            <div>
+                <div v-if="showSteps">
+                    <p>@todo ingredient config</p>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="showSteps">
+            <Divider />
+            <p>@todo create steps</p>
+            <Divider />
+            <Button type="button" :label="'Update'" class="mt-3 p-button-rounded" />
         </div>
     </div>
 </template>
