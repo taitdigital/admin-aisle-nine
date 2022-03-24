@@ -129,7 +129,7 @@ export default {
         if (props.existingRecipe) {
             state.name = props.existingRecipe.name
             state.description = props.existingRecipe.description
-            imagePreview = `${IMG_URL}/${props.existingRecipe.image}`
+            imagePreview.value = `${IMG_URL}/${props.existingRecipe.image}`
             showSteps.value = true
         }
 

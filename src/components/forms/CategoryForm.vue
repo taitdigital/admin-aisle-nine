@@ -103,7 +103,7 @@ export default {
         if (props.existingCategory) {
             state.name = props.existingCategory.name
             state.description = props.existingCategory.description
-            imagePreview = `${IMG_URL}/${props.existingCategory.image}`
+            imagePreview.value = `${IMG_URL}/${props.existingCategory.image}`
         }
 
         const rules: any = {

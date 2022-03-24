@@ -100,7 +100,7 @@ export default {
         if (props.existingIngredient) {
             state.name = props.existingIngredient.name
             state.description = props.existingIngredient.description
-            imagePreview = `${IMG_URL}/${props.existingIngredient.image}`
+            imagePreview.value = `${IMG_URL}/${props.existingIngredient.image}`
         }
 
         const rules: any = {
