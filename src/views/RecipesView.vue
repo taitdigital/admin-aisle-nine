@@ -1,11 +1,22 @@
 <script lang="ts">
-  import RecipeForm from '../components/forms/RecipeForm.vue';
-  import RecipeList from '../components/RecipeList.vue';
+  import { ref } from 'vue'
+  import RecipeForm from '../components/forms/RecipeForm.vue'
+  import RecipeList from '../components/RecipeList.vue'
 
   export default {
     components: {
       RecipeForm,
       RecipeList
+    },
+    data() {
+      return {
+        existingRecipeId: null
+      }
+    },
+    methods: {
+      onSelectRecipe(recipe_id) {
+        this.existingRecipeId = recipe_id
+      }
     }
   }
 </script>
@@ -17,9 +28,9 @@
           <Card>
             <template #content>
                 <div class="text-lg text-center">
-                    Create Recipe
+                    {{ (existingRecipeId) ? 'Update' : 'Create' }} Recipe
                 </div>
-                <RecipeForm />
+                <RecipeForm :existingRecipeId="existingRecipeId" />
             </template>
           </Card>
 
@@ -32,7 +43,7 @@
                     Manage Recipes
                 </div>
                 <Divider />
-                <RecipeList />
+                <RecipeList @selectRecipe="onSelectRecipe" />
             </template>
           </Card>
       </div>

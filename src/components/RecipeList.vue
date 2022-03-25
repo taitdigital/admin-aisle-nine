@@ -4,11 +4,13 @@ import { useStore } from 'vuex'
 import { IMG_URL } from '../constants/index';
 
 export default {
+    emits: ['selectRecipe'],
     data() {
         return {
             imagePath: IMG_URL,
             searchTerm: '',
-            selectedRecipe: null
+            selectedRecipe: null,
+            selectedRow: null
         }
     },
     computed: {
@@ -17,9 +19,14 @@ export default {
         }
     },
     methods: {
+        handleRowSelect(selectedRecipe) {
+            this.selectedRecipe = selectedRecipe
+            this.$emit("selectRecipe", selectedRecipe.data.recipe_id)
+        },
         handleEdit(selectedRecipe) {
             this.selectedRecipe = selectedRecipe
-            console.warn('selectedRecipe', selectedRecipe)
+            this.$emit("selectRecipe", selectedRecipe.recipe_id)
+
         },
         handleDelete(id) {
             this.$store.dispatch("recipes/delete", id).then((r) => {
@@ -49,7 +56,11 @@ export default {
         </div>
         <div v-if="recipes.length">
             <DataTable 
-                :value="recipes" 
+                :value="recipes"
+                @row-select="handleRowSelect"
+                v-model:selection="selectedRow" 
+                dataKey="recipe_id"
+                selectionMode="single"
                 :paginator="true" 
                 :rows="5"
                 paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"

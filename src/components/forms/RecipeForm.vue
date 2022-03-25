@@ -1,18 +1,23 @@
 <script lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import UploadService from '../../services/upload.service'
 import { IMG_URL } from '../../constants/index'
 import RecipeIngredientList from '../RecipeIngredientList.vue'
+import StepForm from './StepForm.vue'
 
 export default {
-    props: ['existingRecipe'],
+    props: ['existingRecipeId'],
     components: {
-        RecipeIngredientList
+        RecipeIngredientList,
+        StepForm
     },
     methods: {
+        toggleStepDialog() {
+            this.displayStepEdit = !this.displayStepEdit
+        },
         handleImageSelect(event) {
             this.imagePreview = URL.createObjectURL(event.target.files[0])
             this.image = event.target.files[0]
@@ -46,8 +51,6 @@ export default {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
                 } else {
                     this.currentRecipe = r
-                    console.warn(this.currentRecipe);
-
                     this.$toast.add({severity:'success', summary: 'Create success', detail: r, life: 3000})
                     this.uploadImage(r.recipe_id)
                 }
@@ -96,7 +99,6 @@ export default {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
                 })
             } else {
-                // this.clearForm();
                 this.$store.dispatch('recipes/index')
             }
         },
@@ -125,10 +127,11 @@ export default {
         let showSteps = ref(false)
         let imagePreview = ref('')
         let image = ''
-        const submitted = ref(false)
 
+        const submitted = ref(false)
         const filteredCategories = ref([])
         const filteredIngredients = ref([])
+        const displayStepEdit = ref(false);
 
         const state = reactive({
             name: '',
@@ -137,17 +140,8 @@ export default {
             category: null
         })
 
-        const ingredient_id = (props.existingRecipe) ? props.existingRecipe.recipe_id : null;
-        const currentRecipe = ref(props.existingRecipe)
-
-        if (props.existingRecipe) {
-            state.name = props.existingRecipe.name
-            state.description = props.existingRecipe.description
-            // state.category = props.existingRecipe.category_id
-            // state.ingredients = props.existingRecipe.ingredients
-            imagePreview.value = `${IMG_URL}/${props.existingRecipe.image}`
-            showSteps.value = true
-        }
+        const ingredient_id = (props.existingRecipeId) ? props.existingRecipeId : null
+        let currentRecipe = ref(null)
 
         const rules: any = {
             name: { required },
@@ -156,9 +150,20 @@ export default {
             category: { required }
         }
 
+        watch(() => props.existingRecipeId, function() {
+            store.dispatch("recipes/show", props.existingRecipeId).then((r) => {
+                currentRecipe.value = r 
+                state.name = r.name
+                state.description = r.description
+                state.ingredients = r.recipe_ingredients.map(i => ({ 'label': i.ingredient.name, 'value': i.ingredient.ingredient_id }))
+                state.category = filteredCategories.value.find(i => (i.value === r.category_id))
+                image = r.image
+                imagePreview.value = IMG_URL + '/' + r.image
+            })
+        });
 
         const v$ = useVuelidate(rules, state);
-        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, showSteps, filteredCategories, filteredIngredients, currentRecipe }
+        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, showSteps, filteredCategories, filteredIngredients, currentRecipe, props, store, displayStepEdit }
     }
 }
 </script>
@@ -166,7 +171,6 @@ export default {
 <template>
     <div class="recipe-form">
         <Divider />
-
         <div class="flex">
             <div>
             
@@ -290,9 +294,17 @@ export default {
 
         <div v-if="currentRecipe">
             <Divider />
-            <p>@todo create steps</p>
+            <div class="flex justify-content-between">
+                <Button type="button" :label="'Create Step'" @click="toggleStepDialog" class="p-button-rounded p-button-outlined" />
+                <Button type="button" :label="'Update'" class="p-button-rounded " />
+            </div>
+
             <Divider />
-            <Button type="button" :label="'Update'" class="mt-3 p-button-rounded" />
+
+            <Dialog :header="(existingStep) ? 'Update': 'Create' + ' Step'" v-model:visible="displayStepEdit" :style="{width: '50vw'}">
+                <StepForm :recipeId="currentRecipe.recipe_id" existingStep="" />
+            </Dialog>
+
         </div>
     </div>
 </template>

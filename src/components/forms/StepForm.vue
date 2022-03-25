@@ -6,7 +6,7 @@ import UploadService from '../../services/upload.service';
 import { IMG_URL } from '../../constants/index';
 
 export default {
-    props: ['existingStep'],
+    props: ['existingStep', 'recipeId'],
     methods: {
         handleImageSelect(event) {
             this.imagePreview = URL.createObjectURL(event.target.files[0])
@@ -25,7 +25,9 @@ export default {
         create() {
             this.$store.dispatch('steps/create', {
                 'name': this.state.name,
-                'description': this.state.description    
+                'description': this.state.description,
+                'timer': this.state.timer,
+                'recipe_id': this.$props.recipeId    
             }).then((r) => {
                 if (r.errors) {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
@@ -66,7 +68,7 @@ export default {
                 
                 uploadService.upload({
                     entity_id: id,
-                    entity_type: 'Category',
+                    entity_type: 'Step',
                     file: this.image
                 }).then((r) => {
                     this.$toast.add({severity:'success', summary: 'Upload successful', detail: r, life: 3000});
@@ -112,13 +114,14 @@ export default {
         }
 
         const v$ = useVuelidate(rules, state);
-        return { v$, state, rules, step_id, imagePreview, image, submitted }
+        return { v$, state, rules, step_id, imagePreview, image, submitted, props }
     }
 }
 </script>
 
 <template>
     <div class="step-form">
+        <h1>{{ props }}</h1>
         <Divider />
         <div class="flex justify-content-center">
             <form @submit.prevent="handleSubmit(!v$.$invalid, step_id)" class="p-fluid form-max-width">
@@ -127,12 +130,11 @@ export default {
                         <i class="pi pi-search" />
                         <InputText 
                             id="name"
-                            @input="handleSearch()" 
                             v-model="v$.name.$model" 
                             :class="{'p-invalid':v$.name.$invalid && submitted}" 
                             aria-describedby="name-error"
                         />
-                        <label for="name" :class="{'p-error':v$.name.$invalid && submitted}">Category Name *</label>
+                        <label for="name" :class="{'p-error':v$.name.$invalid && submitted}">Step Name *</label>
                     </div>
 
                     <span v-if="v$.name.$error && submitted">
@@ -147,6 +149,24 @@ export default {
                 </div>
 
                 <div class="field pt-3">
+                    <label :class="{'p-error':v$.description.$invalid && submitted}">Step Timer</label>
+                    <div class="flex mt-3 field">
+                        <div class="p-float-label mr-1">
+                            <InputNumber id="hours" mode="decimal" showButtons :min="0" class="timer-input" />
+                            <label for="hours" :class="{'p-error':v$.description.$invalid && submitted}">Hours</label>
+                        </div>
+                        <div class="p-float-label mr-1 ml-1">
+                            <InputNumber id="minutes" mode="decimal" showButtons :min="0" :max="59" class="timer-input" />
+                            <label for="minutes" :class="{'p-error':v$.description.$invalid && submitted}">Minutes</label>
+                        </div>    
+                        <div class="p-float-label ml-1">
+                            <InputNumber id="seconds" mode="decimal" showButtons :min="0" :max="59" class="timer-input" />
+                            <label for="seconds" :class="{'p-error':v$.description.$invalid && submitted}">Seconds</label>
+                        </div>    
+                    </div>
+                </div>
+
+                <div class="field pt-3">
                     <div class="p-float-label">
                         <Textarea id="description" 
                             v-model="v$.description.$model" 
@@ -156,7 +176,7 @@ export default {
                             rows="3" 
                             cols="30" 
                         />
-                        <label for="description" :class="{'p-error':v$.description.$invalid && submitted}">Category Description *</label>
+                        <label for="description" :class="{'p-error':v$.description.$invalid && submitted}">Step Description *</label>
                     </div>
 
                     <span v-if="v$.description.$error && submitted">
