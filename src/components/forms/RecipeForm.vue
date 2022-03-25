@@ -1,13 +1,17 @@
 <script lang="ts">
-import { reactive, ref, onMounted, computed } from 'vue'
+import { reactive, ref } from 'vue'
 import { useStore } from 'vuex'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import UploadService from '../../services/upload.service'
 import { IMG_URL } from '../../constants/index'
+import RecipeIngredientList from '../RecipeIngredientList.vue'
 
 export default {
     props: ['existingRecipe'],
+    components: {
+        RecipeIngredientList
+    },
     methods: {
         handleImageSelect(event) {
             this.imagePreview = URL.createObjectURL(event.target.files[0])
@@ -34,13 +38,18 @@ export default {
         create() {
             this.$store.dispatch('recipes/create', {
                 'name': this.state.name,
-                'description': this.state.description    
+                'description': this.state.description,
+                'ingredients': this.state.ingredients,
+                'category_id': this.state.category.value  
             }).then((r) => {
                 if (r.errors) {
-                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
+                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
                 } else {
+                    this.currentRecipe = r
+                    console.warn(this.currentRecipe);
+
                     this.$toast.add({severity:'success', summary: 'Create success', detail: r, life: 3000})
-                    this.uploadImage(r.category_id);
+                    this.uploadImage(r.recipe_id)
                 }
             },
             (error) => {
@@ -52,7 +61,9 @@ export default {
                 id: id, 
                 payload: { 
                     'name': this.state.name,
-                    'description': this.state.description
+                    'description': this.state.description,
+                    'ingredients': this.state.ingredients,
+                    'category_id': this.state.category.value  
                 }         
             }).then((r) => {
                 if (r.errors) {
@@ -85,13 +96,15 @@ export default {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
                 })
             } else {
-                this.clearForm();
+                // this.clearForm();
                 this.$store.dispatch('recipes/index')
             }
         },
         clearForm() {
             this.state.name = ''
             this.state.description = ''
+            this.state.ingredients = ''
+            this.state.category = ''
             this.image = ''
             this.imagePreview = null
             this.submitted = false
@@ -125,10 +138,13 @@ export default {
         })
 
         const ingredient_id = (props.existingRecipe) ? props.existingRecipe.recipe_id : null;
+        const currentRecipe = ref(props.existingRecipe)
 
         if (props.existingRecipe) {
             state.name = props.existingRecipe.name
             state.description = props.existingRecipe.description
+            // state.category = props.existingRecipe.category_id
+            // state.ingredients = props.existingRecipe.ingredients
             imagePreview.value = `${IMG_URL}/${props.existingRecipe.image}`
             showSteps.value = true
         }
@@ -140,8 +156,9 @@ export default {
             category: { required }
         }
 
+
         const v$ = useVuelidate(rules, state);
-        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, showSteps, filteredCategories, filteredIngredients }
+        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, showSteps, filteredCategories, filteredIngredients, currentRecipe }
     }
 }
 </script>
@@ -237,8 +254,15 @@ export default {
 
                     <div class="field pt-5">
                         <div class="p-float-label">
-                            <AutoComplete :multiple="true" v-model="v$.ingredients.$model" :suggestions="filteredIngredients" dropdown @complete="searchIngredients($event)" field="label" />
-                            <label for="category" :class="{'p-error':v$.category.$invalid && submitted}">Ingredients *</label>
+                            <AutoComplete 
+                                id="ingredient_selection" 
+                                :multiple="true" 
+                                v-model="v$.ingredients.$model" 
+                                :suggestions="filteredIngredients" 
+                                dropdown @complete="searchIngredients($event)"
+                                 field="label" 
+                            />
+                            <label for="ingredient_selection" :class="{'p-error':v$.ingredients.$invalid && submitted}">Ingredients *</label>
                         </div>
 
                         <span v-if="v$.ingredients.$error && submitted">
@@ -252,19 +276,19 @@ export default {
                         </small>
                     </div>
 
-                    <Button type="submit" v-if="!existingRecipe || !showSteps" :label="'Create'" class="mt-3 p-button-rounded" />
+                    <Button type="submit" v-if="!currentRecipe" :label="'Create'" class="mt-3 p-button-rounded" />
                 </form>
             
             </div>
-            <Divider layout="vertical" align="left" v-if="showSteps" />
-            <div>
-                <div v-if="showSteps">
-                    <p>@todo ingredient config</p>
+            <Divider layout="vertical" align="left" v-if="currentRecipe" />
+            <div class="flex-grow-1">
+                <div v-if="currentRecipe">
+                    <RecipeIngredientList :ingredients="currentRecipe.recipe_ingredients" />
                 </div>
             </div>
         </div>
 
-        <div v-if="showSteps">
+        <div v-if="currentRecipe">
             <Divider />
             <p>@todo create steps</p>
             <Divider />

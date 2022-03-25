@@ -5,3 +5,22 @@ export const getApiToken = () => {
     const user = localStorage.getItem('user');
     return (user) ? JSON.parse(user).token : null;
 }
+
+export const treatment_options = [
+    'whole',
+    'crushed',
+    'powdered',
+    'muddled',
+    'diced',
+    'peeled',
+    'sliced'
+]
+
+export const measurement_options = [
+    'kg',
+    'g',
+    'mg',
+    'l',
+    'ml',
+    'cup(s)'
+]
