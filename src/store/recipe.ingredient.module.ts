@@ -1,4 +1,4 @@
-import RecipeService from '../services/recipe.service';
+import RecipeIngredientService from '../services/recipe.ingredient.service';
 
 const recipeIngredientsStorage = localStorage.getItem('recipeIngredients');
 const recipeIngredients = (recipeIngredientsStorage) ? JSON.parse(recipeIngredientsStorage) : null;
@@ -9,8 +9,8 @@ export const recipeIngredientStore = {
   namespaced: true,
   state: initialState,
   actions: {
-    index({ commit }) {
-      RecipeService.index().then(
+    index({ commit }, recipe_id) {
+      RecipeIngredientService.index(recipe_id).then(
         recipes => {
           commit('getRecipeIngredientsSuccess', recipes);
           return Promise.resolve(recipes);
@@ -22,7 +22,7 @@ export const recipeIngredientStore = {
       );
     },
     create({ commit }, payload) {
-      return RecipeService.create(payload).then(
+      return RecipeIngredientService.create(payload).then(
         recipe => {
           commit('createRecipeIngredientSuccess', recipe);
           return Promise.resolve(recipe);
@@ -34,7 +34,7 @@ export const recipeIngredientStore = {
       );
     },
     edit({ commit }, id, payload) {
-      return RecipeService.edit(id, payload).then(
+      return RecipeIngredientService.edit(id, payload).then(
         recipe => {
           commit('editRecipeIngredientSuccess', recipe);
           return Promise.resolve(recipe);
@@ -46,7 +46,7 @@ export const recipeIngredientStore = {
       );
     },
     delete({ commit }, id) {
-      return RecipeService.delete(id).then(
+      return RecipeIngredientService.delete(id).then(
         response => {
           commit('deleteRecipeIngredientSuccess', response);
           return Promise.resolve(response);
@@ -59,28 +59,28 @@ export const recipeIngredientStore = {
     }
   },
   mutations: {
-    getRecipeIngredientsSuccess(state, recipes) {
+    getRecipeIngredientsSuccess(state, recipeIngredients) {
       state.recipeIngredients = recipeIngredients;
     },
     getRecipeIngredientsFailure(state) {
       state.recipeIngredients = null;
     },
-    createRecipeIngredientsSuccess(state) {
+    createRecipeIngredientSuccess(state) {
 
     },
-    createRecipeIngredientsFailure(state) {
+    createRecipeIngredientFailure(state) {
 
     },
-    editRecipeIngredientsSuccess(state) {
+    editRecipeIngredientSuccess(state) {
 
     },
-    editRecipeIngredientsFailure(state) {
+    editRecipeIngredientFailure(state) {
 
     },
-    deleteRecipeIngredientsSuccess(state) {
-
+    deleteRecipeIngredientSuccess(state, recipeIngredients) {
+      state.recipeIngredients = recipeIngredients;
     },
-    deleteRecipeIngredientsFailure(state) {
+    deleteRecipeIngredientFailure(state) {
 
     }
   }

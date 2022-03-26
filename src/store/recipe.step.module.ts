@@ -1,16 +1,16 @@
-import RecipeService from '../services/recipe.service';
+import RecipeStepService from '../services/step.service';
 
 const recipeStepStorage = localStorage.getItem('recipeSteps');
 const recipeSteps = (recipeStepStorage) ? JSON.parse(recipeStepStorage) : null;
 
-const initialState = recipeSteps ? { recipeSteps } : { steps: [] };
+const initialState = recipeSteps ? { recipeSteps } : { recipeSteps: [] };
 
 export const recipeStepStore = {
   namespaced: true,
   state: initialState,
   actions: {
-    index({ commit }) {
-      RecipeService.index().then(
+    index({ commit }, $recipe_id) {
+      RecipeStepService.index($recipe_id).then(
         recipes => {
           commit('getRecipeStepsSuccess', recipes);
           return Promise.resolve(recipes);
@@ -21,8 +21,8 @@ export const recipeStepStore = {
         }
       );
     },
-    create({ commit }, payload) {
-      return RecipeService.create(payload).then(
+    create({ commit }, {id, payload}) {
+      return RecipeStepService.create(id, payload).then(
         recipe => {
           commit('createRecipeStepSuccess', recipe);
           return Promise.resolve(recipe);
@@ -33,8 +33,8 @@ export const recipeStepStore = {
         }
       );
     },
-    edit({ commit }, id, payload) {
-      return RecipeService.edit(id, payload).then(
+    edit({ commit }, {id, payload}) {
+      return RecipeStepService.edit(id, payload).then(
         recipe => {
           commit('editRecipeStepSuccess', recipe);
           return Promise.resolve(recipe);
@@ -46,7 +46,7 @@ export const recipeStepStore = {
       );
     },
     delete({ commit }, id) {
-      return RecipeService.delete(id).then(
+      return RecipeStepService.delete(id).then(
         response => {
           commit('deleteRecipeStepSuccess', response);
           return Promise.resolve(response);
@@ -59,28 +59,28 @@ export const recipeStepStore = {
     }
   },
   mutations: {
-    getRecipeStepsSuccess(state, recipes) {
-      state.recipeSteps = recipes;
+    getRecipeStepsSuccess(state, steps) {
+      state.recipeSteps = steps;
     },
     getRecipeStepsFailure(state) {
       state.recipeSteps = null;
     },
-    createRecipeStepsSuccess(state) {
+    createRecipeStepSuccess(state) {
 
     },
-    createRecipeStepsFailure(state) {
+    createRecipeStepFailure(state) {
 
     },
-    editRecipeStepsSuccess(state) {
+    editRecipeStepSuccess(state) {
 
     },
-    editRecipeStepsFailure(state) {
+    editRecipeStepFailure(state) {
 
     },
-    deleteRecipeStepsSuccess(state) {
+    deleteRecipeStepSuccess(state) {
 
     },
-    deleteRecipeStepsFailure(state) {
+    deleteRecipeStepFailure(state) {
 
     }
   }

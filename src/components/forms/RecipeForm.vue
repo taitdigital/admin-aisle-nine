@@ -7,16 +7,32 @@ import UploadService from '../../services/upload.service'
 import { IMG_URL } from '../../constants/index'
 import RecipeIngredientList from '../RecipeIngredientList.vue'
 import StepForm from './StepForm.vue'
+import StepList from '../StepList.vue'
+
 
 export default {
     props: ['existingRecipeId'],
     components: {
         RecipeIngredientList,
-        StepForm
+        StepForm,
+        StepList
     },
     methods: {
-        toggleStepDialog() {
+        toggleStepDialog(selectedStep) {
+            this.existingStep = selectedStep
             this.displayStepEdit = !this.displayStepEdit
+        },
+        reloadRecipe() {
+            this.$store.dispatch('recipes/show', this.currentRecipe.recipe_id).then((r) => {
+                this.currentRecipe = r
+
+                this.state.name = r.name
+                this.state.description = r.description
+                this.state.ingredients = r.recipe_ingredients.map(i => ({ 'label': i.ingredient.name, 'value': i.ingredient.ingredient_id }))
+                this.category = this.filteredCategories.find(i => (i.value === r.category_id))
+                this.image = r.image
+                this.imagePreview = IMG_URL + '/' + r.image
+            });
         },
         handleImageSelect(event) {
             this.imagePreview = URL.createObjectURL(event.target.files[0])
@@ -75,11 +91,27 @@ export default {
                     this.$toast.add({severity:'success', summary: 'Edit success', detail: r, life: 3000})
                     this.uploadImage(r.category_id)
                 }
-
             },
             (error) => {
                 this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
             }) 
+
+            this.reloadRecipe()
+        },
+        dropdownDeleteRecipeIngredient(ingredient_id) {
+            this.deleteRecipeIngredient(
+                this.currentRecipe.recipe_ingredients.find(r => (r.ingredient_id === ingredient_id)).recipe_ingredient_id
+            )
+        },
+        deleteRecipeIngredient(recipe_ingredient_id) {
+            this.$store.dispatch('recipeIngredients/delete', recipe_ingredient_id).then((r) => {
+                    this.$toast.add({severity:'success', summary: 'Delete Successful', detail: r, life: 3000})
+                    this.reloadRecipe()
+                },
+                (error) => {
+                    console.warn(error)
+                }
+            );  
         },
         uploadImage(id) {
             if (this.image) {
@@ -142,6 +174,7 @@ export default {
 
         const ingredient_id = (props.existingRecipeId) ? props.existingRecipeId : null
         let currentRecipe = ref(null)
+        let existingStep = ref(null)
 
         const rules: any = {
             name: { required },
@@ -163,7 +196,7 @@ export default {
         });
 
         const v$ = useVuelidate(rules, state);
-        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, showSteps, filteredCategories, filteredIngredients, currentRecipe, props, store, displayStepEdit }
+        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, showSteps, filteredCategories, filteredIngredients, currentRecipe, props, store, displayStepEdit, existingStep }
     }
 }
 </script>
@@ -234,7 +267,7 @@ export default {
                             <input type="file" id="file-recipe" class="file" v-on:change="handleImageSelect">
                             <label for="file-recipe" class="p-button p-button-outlined file-button">
                                 <span class="p-button-label" v-if="!image">Upload Image</span>
-                                <span class="p-button-label" v-if="image">{{ image.name }}</span>
+                                <span class="p-button-label" v-if="image">{{ image.name ?? 'Upload Image' }}</span>
                             </label>
                         </div>
                     </div>
@@ -263,7 +296,9 @@ export default {
                                 :multiple="true" 
                                 v-model="v$.ingredients.$model" 
                                 :suggestions="filteredIngredients" 
-                                dropdown @complete="searchIngredients($event)"
+                                dropdown 
+                                @item-unselect="dropdownDeleteRecipeIngredient($event.value.value)"
+                                @complete="searchIngredients($event)"
                                  field="label" 
                             />
                             <label for="ingredient_selection" :class="{'p-error':v$.ingredients.$invalid && submitted}">Ingredients *</label>
@@ -287,7 +322,7 @@ export default {
             <Divider layout="vertical" align="left" v-if="currentRecipe" />
             <div class="flex-grow-1">
                 <div v-if="currentRecipe">
-                    <RecipeIngredientList :ingredients="currentRecipe.recipe_ingredients" />
+                    <RecipeIngredientList :ingredients="currentRecipe.recipe_ingredients" @deleteRecipeIngredient="deleteRecipeIngredient" />
                 </div>
             </div>
         </div>
@@ -296,13 +331,15 @@ export default {
             <Divider />
             <div class="flex justify-content-between">
                 <Button type="button" :label="'Create Step'" @click="toggleStepDialog" class="p-button-rounded p-button-outlined" />
-                <Button type="button" :label="'Update'" class="p-button-rounded " />
+                <Button type="button" :label="'Update'" class="p-button-rounded" @click="handleSubmit(true, currentRecipe.recipe_id)" />
             </div>
 
             <Divider />
 
-            <Dialog :header="(existingStep) ? 'Update': 'Create' + ' Step'" v-model:visible="displayStepEdit" :style="{width: '50vw'}">
-                <StepForm :recipeId="currentRecipe.recipe_id" existingStep="" />
+            <StepList :recipeId="currentRecipe.recipe_id" @selectStep="toggleStepDialog" /> 
+
+            <Dialog :header="(existingStep) ? 'Update Step': 'Create Step'" v-model:visible="displayStepEdit" :style="{width: '50vw'}">
+                <StepForm :recipeId="currentRecipe.recipe_id" :existingStep="existingStep" />
             </Dialog>
 
         </div>

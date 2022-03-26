@@ -57,7 +57,7 @@ export const recipeStore = {
         }
       );
     },
-    edit({ commit }, id, payload) {
+    edit({ commit }, {id, payload}) {
       return RecipeService.edit(id, payload).then(
         recipe => {
           commit('editRecipeSuccess', recipe);

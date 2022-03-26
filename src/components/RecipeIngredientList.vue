@@ -1,31 +1,31 @@
 <script lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import { measurement_options, treatment_options } from '../constants'
 
 export default {
     props: [
-        'ingredients',
+        'ingredients'
     ],
+    emits: ['deleteRecipeIngredient'],
     methods: {
-        handleDelete(id) {
-            this.$store.dispatch("recipes/ingredients/delete", id).then((r) => {
-                this.$toast.add({severity:'success', summary: 'Delete Successful', detail: r, life: 3000})
-                this.$store.dispatch("ingredients/index")
-            },
-            (error) => {
-              console.warn(error)
-            }
-          );  
+        handleDelete(recipe_ingredient_id) {
+            this.$emit('deleteRecipeIngredient', recipe_ingredient_id)
         }
     },
     setup(props) {
         const store = useStore()
         const ingredients = ref(props.ingredients)
+
         const measurementOptions = measurement_options.map(i => ({ label: i, value: i }))
         const treatmentOptions = treatment_options.map(i => ({ label: i, value: i }))
 
         onMounted(() => {})
+
+        watch(() => props.ingredients, (newValue, oldValue) => {
+            ingredients.value = newValue
+        });
+
         return { store, ingredients, measurementOptions, treatmentOptions }
     }
 }

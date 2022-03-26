@@ -1,8 +1,8 @@
 import { API_URL, getApiToken } from '../constants/index'
 
-class RecipeStepService {
-  index(recipeId) {
-    return fetch(`${API_URL}/recipes/${recipeId}/steps`, {
+class RecipeIngredientService {
+  index(recipe_id) {
+    return fetch(API_URL + '/recipes/ingredients/' + recipe_id, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -12,7 +12,7 @@ class RecipeStepService {
       .then(response => response.json())
       .then(data => {
         if (data) {
-            localStorage.setItem('steps', JSON.stringify(data));
+            localStorage.setItem('ingredients', JSON.stringify(data));
         }
         return data;
       })
@@ -23,8 +23,32 @@ class RecipeStepService {
 
   }
 
-  show(recipeId, stepId: number) {
-    return fetch(API_URL + '/recipes/'+ recipeId +'/steps/' + stepId, {
+  search(searchTerm) {
+    return fetch(API_URL + '/recipes/ingredients/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + getApiToken(),
+        },
+        body: JSON.stringify({ search: searchTerm })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data) {
+            localStorage.setItem('ingredients', JSON.stringify(data));
+        }
+        return data;
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        return error;
+      });
+
+  }
+
+  show(id: number) {
+    return fetch(API_URL + '/recipes/ingredients/' + id, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -42,8 +66,8 @@ class RecipeStepService {
 
   }
 
-  create(recipeId, payload: any) {
-    return fetch(API_URL + '/recipes/'+ recipeId +'/steps', {
+  create(payload: any) {
+    return fetch(API_URL + '/recipes/ingredients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,7 +88,7 @@ class RecipeStepService {
   }
 
   edit(id: number, payload: any) {
-    return fetch(API_URL + '/steps/' + id, {
+    return fetch(API_URL + '/recipes/ingredients/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +109,7 @@ class RecipeStepService {
   }
 
   delete(id: number) {
-    return fetch(API_URL + '/steps/' + id, {
+    return fetch(API_URL + '/recipes/ingredients/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -107,4 +131,4 @@ class RecipeStepService {
 
 }
 
-export default new RecipeStepService();
+export default new RecipeIngredientService();

@@ -11,8 +11,6 @@ export default {
         handleImageSelect(event) {
             this.imagePreview = URL.createObjectURL(event.target.files[0])
             this.image = event.target.files[0]
-
-            console.warn('handleImageSelect', this.imagePreview);
         },
         handleSearch() {
             this.$store.dispatch('steps/search', this.state.name)
@@ -23,11 +21,14 @@ export default {
             if (!id) { this.create() } else { this.edit(id) }
         },
         create() {
-            this.$store.dispatch('steps/create', {
-                'name': this.state.name,
-                'description': this.state.description,
-                'timer': this.state.timer,
-                'recipe_id': this.$props.recipeId    
+            this.$store.dispatch('recipeSteps/create', {
+                id: this.props.recipeId, 
+                payload: { 
+                    'name': this.state.name,
+                    'description': this.state.description,
+                    'timer': this.state.timer,
+                    'recipe_id': this.$props.recipeId    
+                }
             }).then((r) => {
                 if (r.errors) {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
@@ -41,11 +42,11 @@ export default {
             })
         },
         edit(id) {
-            this.$store.dispatch('steps/edit', { 
+            this.$store.dispatch('recipeSteps/edit', { 
                 id: id, 
                 payload: { 
                     'name': this.state.name,
-                    'description': this.state.description
+                    'description': this.state.description,
                 }         
             }).then((r) => {
                 if (r.errors) {
@@ -73,14 +74,14 @@ export default {
                 }).then((r) => {
                     this.$toast.add({severity:'success', summary: 'Upload successful', detail: r, life: 3000});
                     this.clearForm();
-                    this.$store.dispatch('steps/index')
+                    this.$store.dispatch('recipeSteps/index')
                 },
                 (error) => {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
                 })
             } else {
                 this.clearForm();
-                this.$store.dispatch('steps/index')
+                this.$store.dispatch('recipeSteps/index',)
             }
         },
         clearForm() {
@@ -100,7 +101,7 @@ export default {
             description: ''
         })
 
-        const step_id = (props.existingStep) ? props.existingStep.step_id : null;
+        const step_id = (props.existingStep) ? props.existingStep.recipe_step_id : null;
 
         if (props.existingStep) {
             state.name = props.existingStep.name
@@ -121,7 +122,6 @@ export default {
 
 <template>
     <div class="step-form">
-        <h1>{{ props }}</h1>
         <Divider />
         <div class="flex justify-content-center">
             <form @submit.prevent="handleSubmit(!v$.$invalid, step_id)" class="p-fluid form-max-width">
