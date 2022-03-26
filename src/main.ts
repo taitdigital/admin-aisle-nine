@@ -17,7 +17,7 @@ import Column from 'primevue/column';
 import Divider from 'primevue/divider';
 import ToastService from 'primevue/toastservice';
 import AutoComplete from 'primevue/autocomplete';
-
+import ConfirmationService from 'primevue/confirmationservice';
 
 import "primevue/resources/themes/saga-blue/theme.css"
 import "primevue/resources/primevue.min.css"
@@ -27,10 +27,11 @@ import "./global-styles.css"
 
 const app = createApp(App);
 
-app.use(router);
-app.use(PrimeVue);
-app.use(store);
-app.use(ToastService);
+app.use(router)
+    .use(PrimeVue)
+    .use(store)
+    .use(ToastService)
+    .use(ConfirmationService)
 
 app
     .component('Menubar', Menubar)

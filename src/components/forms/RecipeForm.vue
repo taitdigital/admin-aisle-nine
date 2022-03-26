@@ -12,6 +12,7 @@ import StepList from '../StepList.vue'
 
 export default {
     props: ['existingRecipeId'],
+    emits: ['recipeCreated'],
     components: {
         RecipeIngredientList,
         StepForm,
@@ -56,7 +57,7 @@ export default {
                 this.filteredIngredients = this.$store.state.ingredients.ingredients.map(i => ({ 'label': i.name, 'value': i.ingredient_id }))
             })
         },
-        create() {
+        create() {            
             this.$store.dispatch('recipes/create', {
                 'name': this.state.name,
                 'description': this.state.description,
@@ -68,6 +69,7 @@ export default {
                 } else {
                     this.currentRecipe = r
                     this.$toast.add({severity:'success', summary: 'Create success', detail: r, life: 3000})
+                    this.$emit("recipeCreated", this.currentRecipe)
                     this.uploadImage(r.recipe_id)
                 }
             },
@@ -124,7 +126,6 @@ export default {
                     file: this.image
                 }).then((r) => {
                     this.$toast.add({severity:'success', summary: 'Upload successful', detail: r, life: 3000});
-                    this.clearForm();
                     this.$store.dispatch('recipes/index')
                 },
                 (error) => {
@@ -133,16 +134,6 @@ export default {
             } else {
                 this.$store.dispatch('recipes/index')
             }
-        },
-        clearForm() {
-            this.state.name = ''
-            this.state.description = ''
-            this.state.ingredients = ''
-            this.state.category = ''
-            this.image = ''
-            this.imagePreview = null
-            this.submitted = false
-            this.showSteps = true
         }
     },
     mounted() {
@@ -183,16 +174,33 @@ export default {
             category: { required }
         }
 
+
+        const clearForm = () => {
+            state.name = ''
+            state.description = ''
+            state.ingredients = []
+            state.category = ''
+            image = ''
+            imagePreview = null
+            submitted.value = false
+            showSteps.value = true
+        }
+
         watch(() => props.existingRecipeId, function() {
-            store.dispatch("recipes/show", props.existingRecipeId).then((r) => {
-                currentRecipe.value = r 
-                state.name = r.name
-                state.description = r.description
-                state.ingredients = r.recipe_ingredients.map(i => ({ 'label': i.ingredient.name, 'value': i.ingredient.ingredient_id }))
-                state.category = filteredCategories.value.find(i => (i.value === r.category_id))
-                image = r.image
-                imagePreview.value = IMG_URL + '/' + r.image
-            })
+            if (!props.existingRecipeId) {
+                currentRecipe.value = null
+                clearForm()
+            } else {
+                store.dispatch("recipes/show", props.existingRecipeId).then((r) => {
+                    currentRecipe.value = r 
+                    state.name = r.name
+                    state.description = r.description
+                    state.ingredients = r.recipe_ingredients.map(i => ({ 'label': i.ingredient.name, 'value': i.ingredient.ingredient_id }))
+                    state.category = filteredCategories.value.find(i => (i.value === r.category_id))
+                    image = r.image
+                    imagePreview.value = IMG_URL + '/' + r.image
+                })
+            }
         });
 
         const v$ = useVuelidate(rules, state);

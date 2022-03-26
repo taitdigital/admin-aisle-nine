@@ -1,21 +1,18 @@
 <script lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, watch, ref, computed, defineEmits } from 'vue';
 import { useStore } from 'vuex'
 import { IMG_URL } from '../constants/index';
+import ConfirmDialog from 'primevue/confirmdialog';
+
 
 export default {
-    emits: ['selectRecipe'],
+    components: { ConfirmDialog },
+    props: ['createdRecipe'],
+    emits: ['selectRecipe', 'deleteRecipe'],
     data() {
         return {
             imagePath: IMG_URL,
-            searchTerm: '',
-            selectedRecipe: null,
-            selectedRow: null
-        }
-    },
-    computed: {
-        recipes() {
-            return this.$store.state.recipes.recipes;
+            searchTerm: ''
         }
     },
     methods: {
@@ -29,21 +26,46 @@ export default {
 
         },
         handleDelete(id) {
-            this.$store.dispatch("recipes/delete", id).then((r) => {
-                this.$toast.add({severity:'success', summary: 'Delete Successful', detail: r, life: 3000})
-                this.$store.dispatch("recipes/index")
-            },
-            (error) => {
-              console.warn(error);
-            }
-          );  
+            this.$confirm.require({
+                message: 'This action cannot be undone are you sure?',
+                header: 'Delete Recipe',
+                icon: 'pi pi-exclamation-triangle',
+                accept: () => {
+                    this.$store.dispatch("recipes/delete", id).then((r) => {
+                        this.$toast.add({severity:'success', summary: 'Delete Successful', detail: r, life: 3000})
+                        this.$store.dispatch("recipes/index")
+
+                        if (id === this.selectedRecipe?.data?.recipe_id) {
+                            this.$emit("deleteRecipe", null)
+                        }
+                    },
+                    (error) => {
+                        console.warn(error);
+                    })
+                },
+                reject: () => {}
+            })
         }
     },
-    setup() {
+    setup(props, context) {
+        const store = useStore()
+        const selectedRow = ref(null)
+        const recipes = computed(() => store.state.recipes.recipes)
+        let selectedRecipe = null
+
         onMounted(() => {
-            const store = useStore()
             store.dispatch("recipes/index")
         })
+        
+        watch(() => props.createdRecipe, function() {
+            if (props.createdRecipe) {
+                selectedRow.value = props.createdRecipe    
+                selectedRecipe = props.createdRecipe  
+                context.emit("selectRecipe", selectedRecipe.recipe_id)       
+            } 
+        });
+
+        return { selectedRow, recipes, selectedRecipe }
     }
 }
 </script>
@@ -75,7 +97,7 @@ export default {
                 </Column>
             </DataTable>    
         </div>
-
+        <ConfirmDialog></ConfirmDialog>
 	</div>
 </template>
 

@@ -10,12 +10,20 @@
     },
     data() {
       return {
-        existingRecipeId: null
+        existingRecipeId: ref(null),
+        createdRecipe: ref(null)
       }
     },
     methods: {
       onSelectRecipe(recipe_id) {
         this.existingRecipeId = recipe_id
+      },
+      onDeleteRecipe(recipe_id) {
+        this.existingRecipeId = recipe_id
+      },
+      onCreateRecipe(recipe) {
+        console.warn('onCreateRecipe', recipe)
+        this.createdRecipe = recipe
       }
     }
   }
@@ -28,9 +36,9 @@
           <Card>
             <template #content>
                 <div class="text-lg text-center">
-                    {{ (existingRecipeId) ? 'Update' : 'Create' }} Recipe
+                    {{ (existingRecipeId) ? 'Update' : 'Create' }} Recipe {{ existingRecipeId }}
                 </div>
-                <RecipeForm :existingRecipeId="existingRecipeId" />
+                <RecipeForm :existingRecipeId="existingRecipeId" @recipeCreated="onCreateRecipe" />
             </template>
           </Card>
 
@@ -43,7 +51,7 @@
                     Manage Recipes
                 </div>
                 <Divider />
-                <RecipeList @selectRecipe="onSelectRecipe" />
+                <RecipeList @selectRecipe="onSelectRecipe" @deleteRecipe="onDeleteRecipe" :createdRecipe="createdRecipe"/>
             </template>
           </Card>
       </div>
