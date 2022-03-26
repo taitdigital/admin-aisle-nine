@@ -1,12 +1,15 @@
 <script lang="ts">
-import { onMounted } from 'vue';
+import { onMounted } from 'vue'
 import { useStore } from 'vuex'
-import IngredientForm from './forms/IngredientForm.vue';
-import { IMG_URL } from '../constants/index';
+import IngredientForm from './forms/IngredientForm.vue'
+import { IMG_URL } from '../constants/index'
+import ConfirmDialog from 'primevue/confirmdialog'
+
 
 export default {
     components: {
-        IngredientForm
+        IngredientForm,
+        ConfirmDialog
     },
     data() {
         return {
@@ -27,14 +30,22 @@ export default {
             this.displayEdit = !this.displayEdit
         },
         handleDelete(id) {
-            this.$store.dispatch("ingredients/delete", id).then((r) => {
-                this.$toast.add({severity:'success', summary: 'Delete Successful', detail: r, life: 3000})
-                this.$store.dispatch("ingredients/index")
-            },
-            (error) => {
-              console.warn(error);
-            }
-          );  
+            this.$confirm.require({
+                message: 'Ingredients can only be deleted if they are not in use, This action cannot be undone are you sure?',
+                header: 'Delete Ingredient',
+                icon: 'pi pi-exclamation-triangle',
+                accept: () => {
+                    this.$store.dispatch("ingredients/delete", id).then((r) => {
+                            this.$toast.add({severity:'success', summary: 'Delete Successful', detail: r, life: 3000})
+                            this.$store.dispatch("ingredients/index")
+                        },
+                        (error) => {
+                        console.warn(error);
+                        }
+                    )
+                },
+                reject: () => {}
+            })  
         }
     },
     setup() {
@@ -48,6 +59,8 @@ export default {
 
 <template>
 	<div>
+        <ConfirmDialog></ConfirmDialog>
+
         <div v-if="!ingredients.length">
             <h3>No results</h3>
             <Divider />

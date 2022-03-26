@@ -3,10 +3,12 @@ import { onMounted } from 'vue'
 import { useStore } from 'vuex'
 import CategoryForm from './forms/CategoryForm.vue'
 import { IMG_URL } from '../constants/index'
+import ConfirmDialog from 'primevue/confirmdialog';
 
 export default {
     components: {
-        CategoryForm
+        CategoryForm,
+        ConfirmDialog
     },
     data() {
         return {
@@ -27,14 +29,22 @@ export default {
             this.displayEdit = !this.displayEdit
         },
         handleDelete(id) {
-            this.$store.dispatch("categories/delete", id).then((r) => {
-                this.$toast.add({severity:'success', summary: 'Deleted successful', detail: r, life: 3000})
-                this.$store.dispatch("categories/index")
-            },
-            (error) => {
-              console.warn(error);
-            }
-          );  
+            this.$confirm.require({
+                message: 'Categories can only be deleted if they are not in use, This action cannot be undone are you sure?',
+                header: 'Delete Category',
+                icon: 'pi pi-exclamation-triangle',
+                accept: () => {
+                    this.$store.dispatch("categories/delete", id).then((r) => {
+                            this.$toast.add({severity:'success', summary: 'Deleted successful', detail: r, life: 3000})
+                            this.$store.dispatch("categories/index")
+                        },
+                        (error) => {
+                            console.warn(error);
+                        }
+                    );
+                },
+                reject: () => {}
+            })  
         }
     },
     setup() {
