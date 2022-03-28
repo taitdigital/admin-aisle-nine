@@ -79,7 +79,7 @@ export default {
 	<div>
         <div class="flex justify-content-between">
             <span class="text-lg pt-2">Manage Recipes</span>
-            <Button type="button" :label="'Create New Recipe'" @click="clearRowSelection" class="p-button-rounded p-button-outlined" />
+            <Button type="button" icon="pi pi-plus" @click="clearRowSelection" class="p-button-rounded p-button-outlined" />
         </div>
         <Divider />
         <div v-if="!recipes.length">

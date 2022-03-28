@@ -198,7 +198,7 @@ export default {
                     state.category = filteredCategories.value.find(i => (i.value === r.category_id))
                     image = r.image
 
-                    imagePreview.value = (r.image) ? IMG_URL + '/' + r.image : null
+                    imagePreview = (r.image) ? IMG_URL + '/' + r.image : null
                 })
             }
         });
