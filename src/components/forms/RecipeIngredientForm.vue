@@ -13,8 +13,6 @@ export default {
         handleEdit(isValid) {
             if (!isValid) return
 
-            console.warn(this.state);
-
             this.$store.dispatch('recipeIngredients/edit', { 
                 id: this.props.ingredient.recipe_ingredient_id, 
                 payload: { 
@@ -47,8 +45,6 @@ export default {
         })
 
         if (props.ingredient) {
-            console.warn(props.ingredient)
-
             state.quantity = props.ingredient.quantity ?? 1
             state.treatment = treatmentOptions.find(m => (props.ingredient.treatment === m.value))
             state.measurement = measurementOptions.find(m => (props.ingredient.measurement === m.value)) 

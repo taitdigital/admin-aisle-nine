@@ -1,12 +1,12 @@
 <script lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted, watch } from 'vue'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import UploadService from '../../services/upload.service'
 import { IMG_URL } from '../../constants/index'
 
 export default {
-    props: ['existingStep', 'recipeId'],
+    props: ['existingStep', 'recipe'],
     methods: {
         handleImageSelect(event) {
             this.imagePreview = URL.createObjectURL(event.target.files[0])
@@ -20,9 +20,14 @@ export default {
             if (!isFormValid) { return }
             if (!id) { this.create() } else { this.edit(id) }
         },
+        searchIngredients(searchTerm) {
+            this.filteredIngredients = this.props.recipe.recipe_ingredients
+                .map(i => ({ 'label': i.ingredient.name, 'value': i.recipe_ingredient_id }))
+                .filter(i => i.label.includes(searchTerm.query) )
+        },
         create() {
             this.$store.dispatch('recipeSteps/create', {
-                id: this.props.recipeId, 
+                id: this.props.recipe.recipeId, 
                 payload: { 
                     'name': this.state.name,
                     'description': this.state.description,
@@ -47,6 +52,7 @@ export default {
                 payload: { 
                     'name': this.state.name,
                     'description': this.state.description,
+                    'timer': this.state.timer
                 }         
             }).then((r) => {
                 if (r.errors) {
@@ -95,27 +101,36 @@ export default {
     setup(props) {
         let imagePreview = ref('')
         let image = ''
+
+        const mappedIngredients = props.recipe.recipe_ingredients.map(i => ({ 'label': i.ingredient.name, 'value': i.recipe_ingredient_id }));
+        const filteredIngredients = ref([...mappedIngredients])
         const submitted = ref(false)
         const state = reactive({
             name: '',
-            description: ''
+            description: '',
+            timer: '00:00:00',
+            ingredients: []
         })
+
+        console.warn(props.existingStep)
 
         const step_id = (props.existingStep) ? props.existingStep.recipe_step_id : null
 
         if (props.existingStep) {
             state.name = props.existingStep.name
             state.description = props.existingStep.description
-            imagePreview.value = `${IMG_URL}/${props.existingStep.image}`
+            imagePreview.value = (props.existingStep.image) ? `${IMG_URL}/${props.existingStep.image}` : null;
         }
 
         const rules: any = {
             name: { required },
-            description: { required }
+            description: { required },
+            timer: {},
+            ingredients: {}
         }
 
         const v$ = useVuelidate(rules, state)
-        return { v$, state, rules, step_id, imagePreview, image, submitted, props }
+        return { v$, state, rules, step_id, imagePreview, image, submitted, props, filteredIngredients }
     }
 }
 </script>
@@ -206,6 +221,32 @@ export default {
                     </div>
                 </div>
 
+                    <div class="field pt-5">
+                        <div class="p-float-label">
+                            <AutoComplete 
+                                id="recipe_ingredient_selection" 
+                                :multiple="true" 
+                                v-model="v$.ingredients.$model" 
+                                :suggestions="filteredIngredients" 
+                                dropdown 
+                                @item-unselect="handleRemoveIngredient($event.value.value)"
+                                @complete="searchIngredients($event)"
+                                 field="label" 
+                            />
+                            <label for="ingredient_selection" :class="{'p-error':v$.ingredients.$invalid && submitted}">Ingredients *</label>
+                        </div>
+
+                        <span v-if="v$.ingredients.$error && submitted">
+                            <span id="category-error" v-for="(error, index) of v$.ingredients.$errors" :key="index">
+                            <small class="p-error">{{error.$message}}</small>
+                            </span>
+                        </span>
+
+                        <small v-else-if="(v$.ingredients.$invalid && submitted) || v$.ingredients.$pending.$response" class="p-error">
+                            {{v$.ingredients.required.$message.replace('Value', 'Ingredients')}}
+                        </small>
+                    </div>
+
                 <Button type="submit" :label="(existingStep) ? 'Update': 'Create'" class="mt-3 p-button-rounded" />
             </form>
         </div>
@@ -215,7 +256,7 @@ export default {
 
 <style scoped>
     .form-max-width {
-        max-width: 266px;
+        max-width: 400px;
     }
 
     .file {

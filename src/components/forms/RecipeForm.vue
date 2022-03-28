@@ -20,7 +20,7 @@ export default {
     },
     methods: {
         toggleStepDialog(selectedStep) {
-            this.existingStep = selectedStep
+            //this.existingStep = selectedStep
             this.displayStepEdit = !this.displayStepEdit
         },
         reloadRecipe() {
@@ -174,7 +174,6 @@ export default {
             category: { required }
         }
 
-
         const clearForm = () => {
             state.name = ''
             state.description = ''
@@ -198,7 +197,7 @@ export default {
                     state.ingredients = r.recipe_ingredients.map(i => ({ 'label': i.ingredient.name, 'value': i.ingredient.ingredient_id }))
                     state.category = filteredCategories.value.find(i => (i.value === r.category_id))
                     image = r.image
-                    imagePreview.value = IMG_URL + '/' + r.image
+                    imagePreview.value = (r.image) ? IMG_URL + '/' + r.image : null
                 })
             }
         });
@@ -344,10 +343,10 @@ export default {
 
             <Divider />
 
-            <StepList :recipeId="currentRecipe.recipe_id" @selectStep="toggleStepDialog" /> 
+            <StepList :recipe="currentRecipe" @selectStep="toggleStepDialog" /> 
 
             <Dialog :header="(existingStep) ? 'Update Step': 'Create Step'" v-model:visible="displayStepEdit" :style="{width: '50vw'}">
-                <StepForm :recipeId="currentRecipe.recipe_id" :existingStep="existingStep" />
+                <StepForm :recipe="currentRecipe" :existingStep="existingStep" />
             </Dialog>
 
         </div>

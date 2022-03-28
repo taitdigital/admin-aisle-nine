@@ -5,7 +5,7 @@ import { IMG_URL } from '../constants/index';
 
 export default {
     emits: ['selectStep'],
-    props: ['recipeId'],
+    props: ['recipe'],
     data() {
         return {
             imagePath: IMG_URL,
@@ -38,10 +38,10 @@ export default {
         const store = useStore()
 
         onMounted(() => {
-            store.dispatch("recipeSteps/index", props.recipeId)
+            store.dispatch("recipeSteps/index", props.recipe.recipeId)
         })
 
-        return {store, props }
+        return { store, props }
     }
 }
 </script>
