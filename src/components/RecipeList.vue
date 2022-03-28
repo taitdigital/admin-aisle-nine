@@ -16,6 +16,11 @@ export default {
         }
     },
     methods: {
+        clearRowSelection() {
+            this.selectedRow = null
+            this.selectedRecipe = null
+            this.$emit("selectRecipe", null)
+        },
         handleRowSelect(selectedRecipe) {
             this.selectedRecipe = selectedRecipe
             this.$emit("selectRecipe", selectedRecipe.data.recipe_id)
@@ -72,6 +77,11 @@ export default {
 
 <template>
 	<div>
+        <div class="flex justify-content-between">
+            <span class="text-lg pt-2">Manage Recipes</span>
+            <Button type="button" :label="'Create New Recipe'" @click="clearRowSelection" class="p-button-rounded p-button-outlined" />
+        </div>
+        <Divider />
         <div v-if="!recipes.length">
             <h3>No results</h3>
             <Divider />

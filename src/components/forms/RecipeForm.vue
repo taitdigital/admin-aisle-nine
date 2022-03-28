@@ -148,7 +148,7 @@ export default {
         const store = useStore()
         
         let showSteps = ref(false)
-        let imagePreview = ref('')
+        let imagePreview = ref(null)
         let image = ''
 
         const submitted = ref(false)
@@ -197,13 +197,31 @@ export default {
                     state.ingredients = r.recipe_ingredients.map(i => ({ 'label': i.ingredient.name, 'value': i.ingredient.ingredient_id }))
                     state.category = filteredCategories.value.find(i => (i.value === r.category_id))
                     image = r.image
+
                     imagePreview.value = (r.image) ? IMG_URL + '/' + r.image : null
                 })
             }
         });
 
         const v$ = useVuelidate(rules, state);
-        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, showSteps, filteredCategories, filteredIngredients, currentRecipe, props, store, displayStepEdit, existingStep }
+        return { 
+            v$, 
+            state, 
+            rules, 
+            ingredient_id, 
+            imagePreview, 
+            image, 
+            submitted, 
+            showSteps, 
+            filteredCategories, 
+            filteredIngredients, 
+            currentRecipe, 
+            props, 
+            store, 
+            displayStepEdit, 
+            existingStep,
+            clearForm 
+        }
     }
 }
 </script>

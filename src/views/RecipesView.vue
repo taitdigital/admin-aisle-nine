@@ -22,7 +22,6 @@
         this.existingRecipeId = recipe_id
       },
       onCreateRecipe(recipe) {
-        console.warn('onCreateRecipe', recipe)
         this.createdRecipe = recipe
       }
     }
@@ -47,10 +46,6 @@
       <div class="col-4">
           <Card>
             <template #content>
-                <div class="text-lg text-center">
-                    Manage Recipes
-                </div>
-                <Divider />
                 <RecipeList @selectRecipe="onSelectRecipe" @deleteRecipe="onDeleteRecipe" :createdRecipe="createdRecipe"/>
             </template>
           </Card>
