@@ -2,7 +2,7 @@ import { API_URL, getApiToken } from '../constants/index'
 
 class RecipeStepService {
   index(recipeId) {
-    return fetch(`${API_URL}/recipes/${recipeId}/steps`, {
+    return fetch(`${API_URL}/recipes/steps/${recipeId}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -42,8 +42,8 @@ class RecipeStepService {
 
   }
 
-  create(recipeId, payload: any) {
-    return fetch(API_URL + '/recipes/'+ recipeId +'/steps', {
+  create(payload: any) {
+    return fetch(API_URL + '/recipes/steps', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

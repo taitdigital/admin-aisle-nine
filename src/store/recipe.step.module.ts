@@ -21,8 +21,8 @@ export const recipeStepStore = {
         }
       );
     },
-    create({ commit }, {id, payload}) {
-      return RecipeStepService.create(id, payload).then(
+    create({ commit }, payload) {
+      return RecipeStepService.create(payload).then(
         recipe => {
           commit('createRecipeStepSuccess', recipe);
           return Promise.resolve(recipe);

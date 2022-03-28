@@ -20,6 +20,9 @@ export default {
         }
     },
     methods: {
+        formatTimerValue(timerRawValue) {
+            return timerRawValue.split(':').map(t => (t.length < 2) ? `0${t}` : t).join(':')
+        },
         toggleEditDialog(selectedStep) {
             this.$emit("selectStep", selectedStep)
         },
@@ -38,7 +41,7 @@ export default {
         const store = useStore()
 
         onMounted(() => {
-            store.dispatch("recipeSteps/index", props.recipe.recipeId)
+            store.dispatch("recipeSteps/index", props.recipe.recipe_id)
         })
 
         return { store, props }
@@ -57,14 +60,19 @@ export default {
                 :value="steps" 
                 responsiveLayout="scroll"
             >
-                <Column field="image" header="">
+                <Column field="step_order" header="Order"></Column>
+                <Column field="image" header="Image">
                     <template #body="slotProps">
                         <img v-if="slotProps.data.image" :src="`${imagePath}/${slotProps.data.image}`" width="50"  height="50"/>
                     </template>
                 </Column>
                 <Column field="name" header="Name"></Column>
                 <Column field="description" header="Description"></Column>
-                <Column field="timer" header="Timer"></Column>
+                <Column field="timer" header="Timer">
+                    <template #body="slotProps">
+                        {{ formatTimerValue(slotProps.data.timer) }}
+                    </template>
+                </Column>
                 <Column header="Actions" style="text-align: right;">
                     <template #body="slotProps">
                         <Button @click="toggleEditDialog(slotProps.data)" icon="pi pi-pencil" class="p-button-text p-button-pirmary" style="margin-right: 6px;" />

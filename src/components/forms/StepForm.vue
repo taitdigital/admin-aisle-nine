@@ -1,13 +1,20 @@
 <script lang="ts">
-import { reactive, ref, onMounted, watch } from 'vue'
+import { reactive, ref } from 'vue'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import UploadService from '../../services/upload.service'
 import { IMG_URL } from '../../constants/index'
+import StepTimerForm from './StepTimerForm.vue'
 
 export default {
-    props: ['existingStep', 'recipe'],
+    props: ['existingStep', 'recipe', 'stepCount'],
+    components: {
+        StepTimerForm
+    },
     methods: {
+        onTimerUpdate(newTimer) {
+            this.state.timer = newTimer
+        },
         handleImageSelect(event) {
             this.imagePreview = URL.createObjectURL(event.target.files[0])
             this.image = event.target.files[0]
@@ -26,14 +33,13 @@ export default {
                 .filter(i => i.label.includes(searchTerm.query) )
         },
         create() {
-            this.$store.dispatch('recipeSteps/create', {
-                id: this.props.recipe.recipeId, 
-                payload: { 
-                    'name': this.state.name,
-                    'description': this.state.description,
-                    'timer': this.state.timer,
-                    'recipe_id': this.$props.recipeId    
-                }
+            this.$store.dispatch('recipeSteps/create', { 
+                'name': this.state.name,
+                'description': this.state.description,
+                'timer': this.state.timer,
+                'recipe_id': this.$props.recipe.recipe_id,
+                'ingredients': this.state.ingredients.map(i => i.value),
+                'step_order': this.props.stepCount++          
             }).then((r) => {
                 if (r.errors) {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
@@ -52,7 +58,9 @@ export default {
                 payload: { 
                     'name': this.state.name,
                     'description': this.state.description,
-                    'timer': this.state.timer
+                    'timer': this.state.timer,
+                    'recipe_id': this.$props.recipe.recipe_id,
+                    'ingredients': this.state.ingredients.map(i => i.value)   
                 }         
             }).then((r) => {
                 if (r.errors) {
@@ -80,14 +88,14 @@ export default {
                 }).then((r) => {
                     this.$toast.add({severity:'success', summary: 'Upload successful', detail: r, life: 3000})
                     this.clearForm();
-                    this.$store.dispatch('recipeSteps/index')
+                    this.$store.dispatch('recipeSteps/index', this.props.recipe.recipe_id)
                 },
                 (error) => {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000})
                 })
             } else {
                 this.clearForm();
-                this.$store.dispatch('recipeSteps/index',)
+                this.$store.dispatch('recipeSteps/index', this.props.recipe.recipe_id)
             }
         },
         clearForm() {
@@ -108,11 +116,9 @@ export default {
         const state = reactive({
             name: '',
             description: '',
-            timer: '00:00:00',
+            timer: '0:0:0',
             ingredients: []
         })
-
-        console.warn(props.existingStep)
 
         const step_id = (props.existingStep) ? props.existingStep.recipe_step_id : null
 
@@ -164,20 +170,8 @@ export default {
                 </div>
 
                 <div class="field pt-3">
-                    <label :class="{'p-error':v$.description.$invalid && submitted}">Step Timer</label>
-                    <div class="flex mt-3 field">
-                        <div class="p-float-label mr-1">
-                            <InputNumber id="hours" mode="decimal" showButtons :min="0" class="timer-input" />
-                            <label for="hours" :class="{'p-error':v$.description.$invalid && submitted}">Hours</label>
-                        </div>
-                        <div class="p-float-label mr-1 ml-1">
-                            <InputNumber id="minutes" mode="decimal" showButtons :min="0" :max="59" class="timer-input" />
-                            <label for="minutes" :class="{'p-error':v$.description.$invalid && submitted}">Minutes</label>
-                        </div>    
-                        <div class="p-float-label ml-1">
-                            <InputNumber id="seconds" mode="decimal" showButtons :min="0" :max="59" class="timer-input" />
-                            <label for="seconds" :class="{'p-error':v$.description.$invalid && submitted}">Seconds</label>
-                        </div>    
+                    <div class="flex mt-3 field mt-3">
+                        <StepTimerForm @timerUpdated="onTimerUpdate" :existingTimer="v$.timer.$model" />   
                     </div>
                 </div>
 
