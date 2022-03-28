@@ -8,7 +8,7 @@ import Dropdown from "primevue/dropdown";
 import Button from "primevue/button";
 import Password from "primevue/password";
 import InputText from "primevue/inputtext";
-import InputNumber from "primevue/inputtext";
+import InputNumber from "primevue/inputnumber";
 import Textarea from "primevue/textarea";
 import Card from 'primevue/card';
 import Menubar from 'primevue/menubar';

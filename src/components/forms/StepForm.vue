@@ -1,9 +1,9 @@
 <script lang="ts">
-import { reactive, ref } from 'vue';
-import { required } from '@vuelidate/validators';
-import { useVuelidate } from '@vuelidate/core';
-import UploadService from '../../services/upload.service';
-import { IMG_URL } from '../../constants/index';
+import { reactive, ref } from 'vue'
+import { required } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
+import UploadService from '../../services/upload.service'
+import { IMG_URL } from '../../constants/index'
 
 export default {
     props: ['existingStep', 'recipeId'],
@@ -58,26 +58,26 @@ export default {
 
             },
             (error) => {
-                this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
+                this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000})
             }) 
         },
         uploadImage(id) {
             if (this.image) {
-                const uploadService = new UploadService();
+                const uploadService = new UploadService()
 
-                this.$toast.add({severity:'info', summary: 'Uploading image', detail: this.image.name, life: 3000});
+                this.$toast.add({severity:'info', summary: 'Uploading image', detail: this.image.name, life: 3000})
                 
                 uploadService.upload({
                     entity_id: id,
                     entity_type: 'Step',
                     file: this.image
                 }).then((r) => {
-                    this.$toast.add({severity:'success', summary: 'Upload successful', detail: r, life: 3000});
+                    this.$toast.add({severity:'success', summary: 'Upload successful', detail: r, life: 3000})
                     this.clearForm();
                     this.$store.dispatch('recipeSteps/index')
                 },
                 (error) => {
-                    this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
+                    this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000})
                 })
             } else {
                 this.clearForm();
@@ -101,7 +101,7 @@ export default {
             description: ''
         })
 
-        const step_id = (props.existingStep) ? props.existingStep.recipe_step_id : null;
+        const step_id = (props.existingStep) ? props.existingStep.recipe_step_id : null
 
         if (props.existingStep) {
             state.name = props.existingStep.name
@@ -114,7 +114,7 @@ export default {
             description: { required }
         }
 
-        const v$ = useVuelidate(rules, state);
+        const v$ = useVuelidate(rules, state)
         return { v$, state, rules, step_id, imagePreview, image, submitted, props }
     }
 }

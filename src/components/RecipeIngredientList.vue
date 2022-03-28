@@ -2,8 +2,12 @@
 import { onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 import { measurement_options, treatment_options } from '../constants'
+import RecipeIngredientForm from './forms/RecipeIngredientForm.vue'
 
 export default {
+    components: {
+        RecipeIngredientForm
+    },
     props: [
         'ingredients'
     ],
@@ -17,16 +21,13 @@ export default {
         const store = useStore()
         const ingredients = ref(props.ingredients)
 
-        const measurementOptions = measurement_options.map(i => ({ label: i, value: i }))
-        const treatmentOptions = treatment_options.map(i => ({ label: i, value: i }))
-
         onMounted(() => {})
 
         watch(() => props.ingredients, (newValue, oldValue) => {
             ingredients.value = newValue
         });
 
-        return { store, ingredients, measurementOptions, treatmentOptions }
+        return { store, ingredients }
     }
 }
 </script>
@@ -49,11 +50,11 @@ export default {
                 </Column>
                 <Column header="Actions" style="text-align: right;">
                     <template #body="slotProps">
-                        <div class="flex justify-content-end flex-wrap">
-                            <InputNumber id="quantity" mode="decimal" showButtons :min="1" class="ingredient-quantity" />
-                            <div class="pl-2 flex-shrink-0"><Dropdown :options="treatmentOptions" optionLabel="label" placeholder="Treatment" /></div>
-                            <div class="pl-2 flex-shrink-0"><Dropdown :options="measurementOptions" optionLabel="label" placeholder="Mesurement" /></div>
-                            <div class="pl-2">
+                        <div class="flex justify-content-end flex-wrap flex-align-middle">
+                            <div class="flex-shrink-1">
+                                <RecipeIngredientForm :ingredient="slotProps.data" />
+                            </div>
+                            <div class="pl-2 flex-shrink-0">
                                 <Button @click="handleDelete(slotProps.data.recipe_ingredient_id)" icon="pi pi-trash" class="p-button-text p-button-danger" />
                             </div>
                         </div>

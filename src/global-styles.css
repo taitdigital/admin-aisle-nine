@@ -10,3 +10,7 @@
 .p-column-header-content {
     display: inline-flex !important;
 }
+
+.quantity-input {
+    width: 50px !important
+}

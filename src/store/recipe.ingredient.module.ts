@@ -33,7 +33,7 @@ export const recipeIngredientStore = {
         }
       );
     },
-    edit({ commit }, id, payload) {
+    edit({ commit }, {id, payload}) {
       return RecipeIngredientService.edit(id, payload).then(
         recipe => {
           commit('editRecipeIngredientSuccess', recipe);
