@@ -19,7 +19,7 @@ export default {
         StepList
     },
     methods: {
-        toggleStepDialog(selectedStep) {
+        toggleStepDialog(selectedStep = null) {
             this.existingStep = selectedStep
             this.displayStepEdit = !this.displayStepEdit
         },
@@ -140,6 +140,7 @@ export default {
     },
     mounted() {
             this.$store.dispatch("categories/index").then(() => {
+                console.warn(this.$store.state)
                 this.filteredCategories = this.$store.state.categories.categories.map(c => ({ 'label': c.name, 'value': c.category_id }))
             })
             this.$store.dispatch("ingredients/index").then(() => {
@@ -388,7 +389,7 @@ export default {
             <Divider />
                 
             <div class="flex justify-content-between">
-                <Button type="button" :label="'Create Step'" @click="toggleStepDialog" class="p-button-rounded p-button-outlined" />
+                <Button type="button" :label="'Create Step'" @click="toggleStepDialog()" class="p-button-rounded p-button-outlined" />
                 <Button type="button" :label="'Update'" class="p-button-rounded" @click="handleSubmit(true, currentRecipe.recipe_id)" />
             </div>
 
