@@ -123,9 +123,13 @@ export default {
         const step_id = (props.existingStep) ? props.existingStep.recipe_step_id : null
 
         if (props.existingStep) {
+            console.warn('props.existingStep', props.existingStep, filteredIngredients)
+
             state.name = props.existingStep.name
             state.description = props.existingStep.description
-            imagePreview.value = (props.existingStep.image) ? `${IMG_URL}/${props.existingStep.image}` : null;
+            state.timer = props.existingStep.timer
+            state.ingredients = filteredIngredients.value.filter(i => props.existingStep.ingredients.includes(i.value)) 
+            imagePreview.value = (props.existingStep.image) ? `${IMG_URL}/${props.existingStep.image}` : null
         }
 
         const rules: any = {

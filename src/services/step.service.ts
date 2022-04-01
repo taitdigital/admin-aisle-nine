@@ -64,7 +64,7 @@ class RecipeStepService {
   }
 
   edit(id: number, payload: any) {
-    return fetch(API_URL + '/steps/' + id, {
+    return fetch(API_URL + '/recipes/steps/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ class RecipeStepService {
   }
 
   delete(id: number) {
-    return fetch(API_URL + '/steps/' + id, {
+    return fetch(API_URL + '/recipes/steps/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

@@ -20,7 +20,7 @@ export default {
     },
     methods: {
         toggleStepDialog(selectedStep) {
-            //this.existingStep = selectedStep
+            this.existingStep = selectedStep
             this.displayStepEdit = !this.displayStepEdit
         },
         reloadRecipe() {
@@ -62,7 +62,8 @@ export default {
                 'name': this.state.name,
                 'description': this.state.description,
                 'ingredients': this.state.ingredients,
-                'category_id': this.state.category.value  
+                'category_id': this.state.category.value,
+                'serves': this.state.serves  
             }).then((r) => {
                 if (r.errors) {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
@@ -84,7 +85,8 @@ export default {
                     'name': this.state.name,
                     'description': this.state.description,
                     'ingredients': this.state.ingredients,
-                    'category_id': this.state.category.value  
+                    'category_id': this.state.category.value,
+                    'serves': this.state.serves
                 }         
             }).then((r) => {
                 if (r.errors) {
@@ -160,7 +162,8 @@ export default {
             name: '',
             description: '',
             ingredients: [],
-            category: null
+            category: null,
+            serves: 1
         })
 
         const ingredient_id = (props.existingRecipeId) ? props.existingRecipeId : null
@@ -171,7 +174,8 @@ export default {
             name: { required },
             description: { required },
             ingredients: { required },
-            category: { required }
+            category: { required },
+            serves: { required }
         }
 
         const clearForm = () => {
@@ -179,6 +183,8 @@ export default {
             state.description = ''
             state.ingredients = []
             state.category = ''
+            state.serves = 1
+
             image = ''
             imagePreview = null
             submitted.value = false
@@ -193,11 +199,12 @@ export default {
                 store.dispatch("recipes/show", props.existingRecipeId).then((r) => {
                     currentRecipe.value = r 
                     state.name = r.name
+                    state.serves = r.serves
                     state.description = r.description
                     state.ingredients = r.recipe_ingredients.map(i => ({ 'label': i.ingredient.name, 'value': i.ingredient.ingredient_id }))
                     state.category = filteredCategories.value.find(i => (i.value === r.category_id))
+                    
                     image = r.image
-
                     imagePreview = (r.image) ? IMG_URL + '/' + r.image : null
                 })
             }
@@ -257,7 +264,7 @@ export default {
                         </small>
                     </div>
 
-                    <div class="field pt-3">
+                    <div class="field pt-3 pb-3">
                         <div class="p-float-label">
                             <Textarea id="description" 
                                 v-model="v$.description.$model" 
@@ -279,6 +286,31 @@ export default {
                         <small v-else-if="(v$.description.$invalid && submitted) || v$.description.$pending.$response" class="p-error">
                             {{v$.name.required.$message.replace('Value', 'Description')}}
                         </small>
+                    </div>
+
+                    <div class="flex-shrink-1 pb-3 p-float-label">
+                        <InputNumber 
+                            id="serves"
+                            :showButtons="true" 
+                            :min="1"
+                            v-model="v$.serves.$model" 
+                            inputClass="serves-input"
+                            :class="{'p-invalid':v$.serves.$invalid && submitted}" 
+                            aria-describedby="serves-error"
+                            @input="handleEdit(!v$.$invalid)"
+                        />
+                        <label for="serves">Serves</label>
+
+                        <span v-if="v$.serves.$error && submitted">
+                            <span id="serves-error" v-for="(error, index) of v$.serves.$errors" :key="index">
+                                <small class="p-error">{{error.$message}}</small>
+                            </span>
+                        </span>
+
+                        <small v-else-if="(v$.serves.$invalid && submitted) || v$.category.$pending.$response" class="p-error">
+                            {{v$.serves.required.$message.replace('Value', 'Serves')}}
+                        </small>
+
                     </div>
 
                     <div class="flex justify-content-end">
@@ -351,9 +383,10 @@ export default {
                 </div>
             </div>
         </div>
-
+   
         <div v-if="currentRecipe">
             <Divider />
+                
             <div class="flex justify-content-between">
                 <Button type="button" :label="'Create Step'" @click="toggleStepDialog" class="p-button-rounded p-button-outlined" />
                 <Button type="button" :label="'Update'" class="p-button-rounded" @click="handleSubmit(true, currentRecipe.recipe_id)" />

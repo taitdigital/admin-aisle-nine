@@ -60,7 +60,7 @@ export default {
                 :value="steps" 
                 responsiveLayout="scroll"
             >
-                <Column field="step_order" header="Order"></Column>
+                <Column field="step_order" header="" :rowReorder="true"></Column>
                 <Column field="image" header="Image">
                     <template #body="slotProps">
                         <img v-if="slotProps.data.image" :src="`${imagePath}/${slotProps.data.image}`" width="50"  height="50"/>

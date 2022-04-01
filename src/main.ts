@@ -18,6 +18,8 @@ import Divider from 'primevue/divider';
 import ToastService from 'primevue/toastservice';
 import AutoComplete from 'primevue/autocomplete';
 import ConfirmationService from 'primevue/confirmationservice';
+import Checkbox from 'primevue/checkbox';
+
 
 import "primevue/resources/themes/saga-blue/theme.css"
 import "primevue/resources/primevue.min.css"
@@ -44,6 +46,7 @@ app
     .component('InputText', InputText)
     .component('InputNumber', InputNumber)
     .component('Textarea', Textarea)
+    .component('Checkbox', Checkbox)    
     .component('Card', Card)
     .component('DataTable', DataTable)
     .component('Column', Column);
