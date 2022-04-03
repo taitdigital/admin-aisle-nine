@@ -174,7 +174,7 @@ export default {
                 </div>
 
                 <div class="field pt-3">
-                    <div class="flex mt-3 field mt-3">
+                    <div class="flex mt-3 field">
                         <StepTimerForm @timerUpdated="onTimerUpdate" :existingTimer="v$.timer.$model" />   
                     </div>
                 </div>
