@@ -9,10 +9,9 @@ import RecipeIngredientList from '../RecipeIngredientList.vue'
 import StepForm from './StepForm.vue'
 import StepList from '../StepList.vue'
 
-
 export default {
     props: ['existingRecipeId'],
-    emits: ['recipeCreated'],
+    emits: ['recipeCreated', 'recipeLoading'],
     components: {
         RecipeIngredientList,
         StepForm,
@@ -33,6 +32,7 @@ export default {
                 this.category = this.filteredCategories.find(i => (i.value === r.category_id))
                 this.image = r.image
                 this.imagePreview = IMG_URL + '/' + r.image
+                this.$emit('recipeLoading', false)
             });
         },
         handleImageSelect(event) {
@@ -42,9 +42,19 @@ export default {
         handleSearch() {
             this.$store.dispatch('recipes/search', this.state.name)
         },
+        handleAutoEdit(isFormValid) {
+            if(this.currentRecipe) {
+                this.submitted = true;
+                if (!isFormValid) { return }
+                this.$emit('recipeLoading', true)
+                this.edit(this.currentRecipe.recipe_id)
+            }
+        },
         handleSubmit(isFormValid, id = null) {
             this.submitted = true;
             if (!isFormValid) { return }
+
+            this.$emit('recipeLoading', true)
             if (!id) { this.create() } else { this.edit(id) }
         },
         searchCategories(searchTerm) {
@@ -66,16 +76,36 @@ export default {
                 'serves': this.state.serves  
             }).then((r) => {
                 if (r.errors) {
-                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
+                    this.$toast.add({
+                        severity:'error', 
+                        summary: 'Error: ', 
+                        detail: 'An error has occurred, see console for details', 
+                        life: 3000
+                    })
+                    console.warn('debug:: ', r.errors)
                 } else {
                     this.currentRecipe = r
-                    this.$toast.add({severity:'success', summary: 'Create success', detail: r, life: 3000})
+
+                    this.$toast.add({
+                        severity:'success', 
+                        summary: 'Create success', 
+                        detail: 'Recipe: ' + this.state.name + ', was created.', 
+                        life: 3000
+                    })
+                    console.warn('debug:: ', r)
+
                     this.$emit("recipeCreated", this.currentRecipe)
                     this.uploadImage(r.recipe_id)
                 }
             },
             (error) => {
-                this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
+                this.$toast.add({
+                    severity:'error', 
+                    summary: 'Error: ', 
+                    detail: 'An error has occurred, see console for details', 
+                    life: 3000
+                })
+                console.warn('debug:: ', error)
             })
         },
         edit(id) {
@@ -90,14 +120,31 @@ export default {
                 }         
             }).then((r) => {
                 if (r.errors) {
-                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
+                    this.$toast.add({
+                        severity:'error', 
+                        summary: 'Error: ', 
+                        detail: 'An error has occurred, see console for details', 
+                        life: 3000
+                    })
+                    console.warn('debug:: ', r.errors)                
                 } else {
-                    this.$toast.add({severity:'success', summary: 'Edit success', detail: r, life: 3000})
+                    this.$toast.add({ 
+                        severity:'success', 
+                        summary: 'Edit success', 
+                        detail: 'Recipe ' + this.state.name + ', was updated.', 
+                        life: 3000 
+                    })
                     this.uploadImage(r.category_id)
                 }
             },
             (error) => {
-                this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
+                this.$toast.add({
+                    severity:'error', 
+                    summary: 'Error: ', 
+                    detail: 'An error has occurred, see console for details', 
+                    life: 3000
+                })
+                console.warn('debug:: ', error)              
             }) 
 
             this.reloadRecipe()
@@ -107,49 +154,116 @@ export default {
                 this.currentRecipe.recipe_ingredients.find(r => (r.ingredient_id === ingredient_id)).recipe_ingredient_id
             )
         },
-        deleteRecipeIngredient(recipe_ingredient_id) {
-            this.$store.dispatch('recipeIngredients/delete', recipe_ingredient_id).then((r) => {
-                    this.$toast.add({severity:'success', summary: 'Delete Successful', detail: r, life: 3000})
+        createRecipeIngredient(recipe_ingredient) {
+            if (this.currentRecipe) {
+                this.$emit('recipeLoading', true)
+
+                this.$store.dispatch('recipeIngredients/create', {
+                    ingredient_id: recipe_ingredient.value,
+                    recipe_id: this.currentRecipe.recipe_id
+                }).then((r) => {
+                    this.$toast.add({
+                        severity:'success', 
+                        summary: 'Create Successful', 
+                        detail: recipe_ingredient.label + ' was added', 
+                        life: 3000
+                    })
+                    console.warn('debug:: ', r)
+
                     this.reloadRecipe()
                 },
                 (error) => {
-                    console.warn(error)
-                }
-            );  
+                    this.$toast.add({
+                        severity:'error', 
+                        summary: 'Error: ', 
+                        detail: 'An error has occurred, see console for details', 
+                        life: 3000
+                    })
+                    console.warn('debug:: ', error)                        }
+                )
+            } 
+        },
+        deleteRecipeIngredient(recipe_ingredient_id) {
+            if (this.currentRecipe) {
+                this.$emit('recipeLoading', true)
+
+                this.$store.dispatch('recipeIngredients/delete', recipe_ingredient_id).then((r) => {
+                        this.$toast.add({
+                            severity:'success', 
+                            summary: 'Delete Successful', 
+                            detail: r, 
+                            life: 3000
+                        })
+                        console.warn('debug:: ', r)
+                        this.reloadRecipe()
+                    },
+                    (error) => {
+                        this.$toast.add({
+                            severity:'error', 
+                            summary: 'Error: ', 
+                            detail: 'An error has occurred, see console for details', 
+                            life: 3000
+                        })
+                        console.warn('debug:: ', error)
+                    }
+                )
+            }
         },
         uploadImage(id) {
             if (this.image) {
                 const uploadService = new UploadService();
-                this.$toast.add({severity:'info', summary: 'Uploading image', detail: this.image.name, life: 3000});
+                
+                this.$toast.add({
+                    severity:'info', 
+                    summary: 'Uploading image', 
+                    detail: this.image.name, 
+                    life: 3000
+                })
 
                 uploadService.upload({
                     entity_id: id,
                     entity_type: 'Recipe',
                     file: this.image
                 }).then((r) => {
-                    this.$toast.add({severity:'success', summary: 'Upload successful', detail: r, life: 3000});
+                    this.$toast.add({
+                        severity:'success', 
+                        summary: 'Upload successful', 
+                        detail: this.image.name + ' was uploaded successfully', 
+                        life: 3000
+                    });
+                    console.warn('debug:: ', r)
+
                     this.$store.dispatch('recipes/index')
+                    this.$emit('recipeLoading', false)
                 },
                 (error) => {
-                    this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
+                    this.$toast.add({
+                        severity:'error', 
+                        summary: 'Error: ', 
+                        detail: 'An error has occurred, see console for details', 
+                        life: 3000
+                    })
+                    console.warn('debug:: ', error)
                 })
             } else {
-                this.$store.dispatch('recipes/index')
+                this.$store.dispatch('recipes/index').then(r => {
+                    this.$emit('recipeLoading', false)
+                })
             }
         }
     },
     mounted() {
-            this.$store.dispatch("categories/index").then(() => {
-                console.warn(this.$store.state)
-                this.filteredCategories = this.$store.state.categories.categories.map(c => ({ 'label': c.name, 'value': c.category_id }))
-            })
-            this.$store.dispatch("ingredients/index").then(() => {
-                this.filteredIngredients = this.$store.state.ingredients.ingredients.map(i => ({ 'label': i.name, 'value': i.ingredient_id }))
-            })
+        this.$store.dispatch("categories/index").then(() => {
+            this.filteredCategories = this.$store.state.categories.categories.map(c => ({ 'label': c.name, 'value': c.category_id }))
+        })
+        this.$store.dispatch("ingredients/index").then(() => {
+            this.filteredIngredients = this.$store.state.ingredients.ingredients.map(i => ({ 'label': i.name, 'value': i.ingredient_id }))
+        })
+
     },
-    setup(props) {
+    setup(props, {emit}) {
         const store = useStore()
-        
+
         let showSteps = ref(false)
         let imagePreview = ref(null)
         let image = ''
@@ -157,7 +271,7 @@ export default {
         const submitted = ref(false)
         const filteredCategories = ref([])
         const filteredIngredients = ref([])
-        const displayStepEdit = ref(false);
+        const displayStepEdit = ref(false)
 
         const state = reactive({
             name: '',
@@ -167,7 +281,7 @@ export default {
             serves: 1
         })
 
-        const ingredient_id = (props.existingRecipeId) ? props.existingRecipeId : null
+        const recipe_id = (props.existingRecipeId) ? props.existingRecipeId : null
         let currentRecipe = ref(null)
         let existingStep = ref(null)
 
@@ -197,6 +311,8 @@ export default {
                 currentRecipe.value = null
                 clearForm()
             } else {
+                emit('recipeLoading', true)
+
                 store.dispatch("recipes/show", props.existingRecipeId).then((r) => {
                     currentRecipe.value = r 
                     state.name = r.name
@@ -207,6 +323,7 @@ export default {
                     
                     image = r.image
                     imagePreview = (r.image) ? IMG_URL + '/' + r.image : null
+                    emit('recipeLoading', false)
                 })
             }
         });
@@ -216,7 +333,7 @@ export default {
             v$, 
             state, 
             rules, 
-            ingredient_id, 
+            recipe_id, 
             imagePreview, 
             image, 
             submitted, 
@@ -240,7 +357,7 @@ export default {
         <div class="flex">
             <div>
             
-                <form @submit.prevent="handleSubmit(!v$.$invalid, ingredient_id)" class="p-fluid form-max-width">
+                <form @submit.prevent="handleSubmit(!v$.$invalid, recipe_id)" class="p-fluid form-max-width">
                     <div class="field pt-3">
                         <div class="p-float-label p-input-icon-right">
                             <i class="pi pi-search" />
@@ -298,7 +415,7 @@ export default {
                             inputClass="serves-input"
                             :class="{'p-invalid':v$.serves.$invalid && submitted}" 
                             aria-describedby="serves-error"
-                            @input="handleEdit(!v$.$invalid)"
+                            @input="handleAutoEdit(!v$.$invalid)"
                         />
                         <label for="serves">Serves</label>
 
@@ -356,6 +473,7 @@ export default {
                                 :suggestions="filteredIngredients" 
                                 dropdown 
                                 @item-unselect="dropdownDeleteRecipeIngredient($event.value.value)"
+                                @item-select="createRecipeIngredient($event.value)"	
                                 @complete="searchIngredients($event)"
                                  field="label" 
                             />

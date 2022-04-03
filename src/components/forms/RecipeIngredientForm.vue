@@ -13,23 +13,43 @@ export default {
         handleEdit(isValid) {
             if (!isValid) return
 
+            const payload = {
+                quantity: this.state.quantity,
+                ...((this.state.treatment) && { treatment: this.state.treatment.value }),
+                ...((this.state.measurement) && { measurement: this.state.measurement.value })
+            }
+
             this.$store.dispatch('recipeIngredients/edit', { 
                 id: this.props.ingredient.recipe_ingredient_id, 
-                payload: { 
-                    quantity: this.state.quantity,
-                    treatment: this.state.treatment.value,
-                    measurement: this.state.measurement.value
-                }         
+                payload         
             }).then((r) => {
                 if (r.errors) {
-                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
+                    this.$toast.add({
+                        severity:'error', 
+                        summary: 'Error: ', 
+                        detail: r.errors, 
+                        life: 3000
+                    })
+                    console.warn('debug:: ', r.errors)
                 } else {
-                    this.$toast.add({severity:'success', summary: 'Edit success', detail: r, life: 3000})
+                    this.$toast.add({
+                        severity:'success', 
+                        summary: 'Edit success', 
+                        detail: this.props.ingredient.ingredient.name + ', was updated.', 
+                        life: 3000
+                    })
+                    console.warn(this.props.ingredient)
                 }
 
             },
             (error) => {
-                this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000})
+                this.$toast.add({
+                    severity:'error', 
+                    summary: 'Error: ', 
+                    detail: error, 
+                    life: 3000
+                })
+                console.warn('debug:: ', error)
             })            
         }
     },
