@@ -2,7 +2,7 @@ import { API_URL, getApiToken } from '../constants/index'
 
 class RecipeIngredientService {
   index(recipe_id) {
-    return fetch(API_URL + '/recipes/ingredients/' + recipe_id, {
+    return fetch(API_URL + '/recipes/recipe-ingredients/' + recipe_id, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -12,7 +12,7 @@ class RecipeIngredientService {
       .then(response => response.json())
       .then(data => {
         if (data) {
-            localStorage.setItem('ingredients', JSON.stringify(data));
+            localStorage.setItem('recipe-ingredients', JSON.stringify(data));
         }
         return data;
       })
@@ -24,7 +24,7 @@ class RecipeIngredientService {
   }
 
   search(searchTerm) {
-    return fetch(API_URL + '/recipes/ingredients/search', {
+    return fetch(API_URL + '/recipes/recipe-ingredients/search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ class RecipeIngredientService {
   }
 
   show(id: number) {
-    return fetch(API_URL + '/recipes/ingredients/' + id, {
+    return fetch(API_URL + '/recipes/recipe-ingredients/' + id, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -67,7 +67,7 @@ class RecipeIngredientService {
   }
 
   create(payload: any) {
-    return fetch(API_URL + '/recipes/ingredients', {
+    return fetch(API_URL + '/recipes/recipe-ingredients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ class RecipeIngredientService {
   }
 
   edit(id: number, payload: any) {
-    return fetch(API_URL + '/recipes/ingredients/' + id, {
+    return fetch(API_URL + '/recipes/recipe-ingredients/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ class RecipeIngredientService {
   }
 
   delete(id: number) {
-    return fetch(API_URL + '/recipes/ingredients/' + id, {
+    return fetch(API_URL + '/recipes/recipe-ingredients/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -126,9 +126,7 @@ class RecipeIngredientService {
         console.error('Error:', error);
         return error;
       });
-
   }
-
 }
 
 export default new RecipeIngredientService();
