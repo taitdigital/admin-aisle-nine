@@ -84,7 +84,6 @@ export default {
                     </template>
                 </Column>
                 <Column field="name" header="Name"></Column>
-                <Column field="description" header="Description"></Column>
                 <Column field="timer" header="Timer">
                     <template #body="slotProps">
                         {{ formatTimerValue(slotProps.data.timer) }}
