@@ -33,13 +33,15 @@ export default {
                 .filter(i => i.label.includes(searchTerm.query) )
         },
         create() {
+            const stepNumber = this.$store.state.recipeSteps.recipeSteps.length + 1
+
             this.$store.dispatch('recipeSteps/create', { 
                 'name': this.state.name,
                 'description': this.state.description,
                 'timer': this.state.timer,
                 'recipe_id': this.$props.recipe.recipe_id,
                 'ingredients': this.state.ingredients.map(i => i.value),
-                'step_order': this.props.stepCount++          
+                'step_order': stepNumber          
             }).then((r) => {
                 if (r.errors) {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
@@ -102,6 +104,8 @@ export default {
             this.state.name = ''
             this.state.description = ''
             this.image = ''
+            this.state.timer = '0:0:0'
+            this.state.ingredients = []
             this.imagePreview = null
             this.submitted = false
         }
@@ -123,8 +127,6 @@ export default {
         const step_id = (props.existingStep) ? props.existingStep.recipe_step_id : null
 
         if (props.existingStep) {
-            console.warn('props.existingStep', props.existingStep, filteredIngredients)
-
             state.name = props.existingStep.name
             state.description = props.existingStep.description
             state.timer = props.existingStep.timer

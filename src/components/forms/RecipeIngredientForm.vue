@@ -38,7 +38,6 @@ export default {
                         detail: this.props.ingredient.ingredient.name + ', was updated.', 
                         life: 3000
                     })
-                    console.warn(this.props.ingredient)
                 }
 
             },

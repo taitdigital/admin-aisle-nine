@@ -13,7 +13,11 @@ export const treatment_options = [
     'muddled',
     'diced',
     'peeled',
-    'sliced'
+    'sliced',
+    'cooked',
+    'melted',
+    'boiled',
+    'grated'
 ]
 
 export const measurement_options = [
@@ -22,5 +26,8 @@ export const measurement_options = [
     'mg',
     'l',
     'ml',
-    'cup(s)'
+    'cup(s)',
+    'rasher(s)',
+    'tsp',
+    'tbsp'
 ]
