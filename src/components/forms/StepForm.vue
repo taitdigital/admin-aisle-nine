@@ -5,19 +5,20 @@ import { useVuelidate } from '@vuelidate/core'
 import UploadService from '../../services/upload.service'
 import { IMG_URL } from '../../constants/index'
 import StepTimerForm from './StepTimerForm.vue'
+import ImageUploadForm from './ImageUploadForm.vue'
 
 export default {
     props: ['existingStep', 'recipe', 'stepCount'],
     components: {
-        StepTimerForm
+        StepTimerForm,
+        ImageUploadForm
     },
     methods: {
         onTimerUpdate(newTimer) {
             this.state.timer = newTimer
         },
-        handleImageSelect(event) {
-            this.imagePreview = URL.createObjectURL(event.target.files[0])
-            this.image = event.target.files[0]
+        handleImageSelect(imageData) {
+            this.image = imageData
         },
         handleSearch() {
             this.$store.dispatch('steps/search', this.state.name)
@@ -44,10 +45,10 @@ export default {
                 'step_order': stepNumber          
             }).then((r) => {
                 if (r.errors) {
-                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
+                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
                 } else {
                     this.$toast.add({severity:'success', summary: 'Create success', detail: r, life: 3000})
-                    this.uploadImage(r.step_id);
+                    this.uploadImage(r.data.recipe_step_id);
                 }
             },
             (error) => {
@@ -69,7 +70,7 @@ export default {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
                 } else {
                     this.$toast.add({severity:'success', summary: 'Edit success', detail: r, life: 3000})
-                    this.uploadImage(r.step_id)
+                    this.uploadImage(r.data.recipe_step_id)
                 }
 
             },
@@ -205,47 +206,35 @@ export default {
                     </small>
                 </div>
 
-                <div class="flex justify-content-end">
-                    <div class="upload-preview">
-                        <span v-if="imagePreview">
-                            <img :src="imagePreview" width="36" height="36"/>
-                        </span>
-                    </div>
-
-                    <div class="file-input">
-                        <input type="file" id="file-step-1" class="file" v-on:change="handleImageSelect">
-                        <label for="file-step" class="p-button p-button-outlined file-button">
-                            <span class="p-button-label" v-if="!image">Upload Image</span>
-                            <span class="p-button-label" v-if="image">{{ image.name }}</span>
-                        </label>
-                    </div>
+                <div class="field pt-3">
+                    <ImageUploadForm :existingImage="imagePreview" @imageSelected="handleImageSelect" />
                 </div>
 
-                    <div class="field pt-5">
-                        <div class="p-float-label">
-                            <AutoComplete 
-                                id="recipe_ingredient_selection" 
-                                :multiple="true" 
-                                v-model="v$.ingredients.$model" 
-                                :suggestions="filteredIngredients" 
-                                dropdown 
-                                @item-unselect="handleRemoveIngredient($event.value.value)"
-                                @complete="searchIngredients($event)"
-                                 field="label" 
-                            />
-                            <label for="ingredient_selection" :class="{'p-error':v$.ingredients.$invalid && submitted}">Ingredients *</label>
-                        </div>
-
-                        <span v-if="v$.ingredients.$error && submitted">
-                            <span id="category-error" v-for="(error, index) of v$.ingredients.$errors" :key="index">
-                            <small class="p-error">{{error.$message}}</small>
-                            </span>
-                        </span>
-
-                        <small v-else-if="(v$.ingredients.$invalid && submitted) || v$.ingredients.$pending.$response" class="p-error">
-                            {{v$.ingredients.required.$message.replace('Value', 'Ingredients')}}
-                        </small>
+                <div class="field pt-5">
+                    <div class="p-float-label">
+                        <AutoComplete 
+                            id="recipe_ingredient_selection" 
+                            :multiple="true" 
+                            v-model="v$.ingredients.$model" 
+                            :suggestions="filteredIngredients" 
+                            dropdown 
+                            @item-unselect="handleRemoveIngredient($event.value.value)"
+                            @complete="searchIngredients($event)"
+                                field="label" 
+                        />
+                        <label for="ingredient_selection" :class="{'p-error':v$.ingredients.$invalid && submitted}">Ingredients *</label>
                     </div>
+
+                    <span v-if="v$.ingredients.$error && submitted">
+                        <span id="category-error" v-for="(error, index) of v$.ingredients.$errors" :key="index">
+                        <small class="p-error">{{error.$message}}</small>
+                        </span>
+                    </span>
+
+                    <small v-else-if="(v$.ingredients.$invalid && submitted) || v$.ingredients.$pending.$response" class="p-error">
+                        {{v$.ingredients.required.$message.replace('Value', 'Ingredients')}}
+                    </small>
+                </div>
 
                 <Button type="submit" :label="(existingStep) ? 'Update': 'Create'" class="mt-3 p-button-rounded" />
             </form>
