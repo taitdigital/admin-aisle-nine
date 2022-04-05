@@ -19,11 +19,11 @@ export default {
         }
         const instanceId = uid()
 
-        let imagePreview = (props.existingImage) ? `${IMG_URL}/${props.existingImage}` : null
+        let imagePreview = ref((props.existingImage) ? `${IMG_URL}/${props.existingImage}` : null)
         let imageData = ref(null)
 
         watch(() => props.existingImage, function() {
-            imagePreview = (props.existingImage) ? `${IMG_URL}/${props.existingImage}` : null
+            imagePreview.value = (props.existingImage) ? `${IMG_URL}/${props.existingImage}` : null
         })
 
         return { imagePreview, imageData, instanceId } 

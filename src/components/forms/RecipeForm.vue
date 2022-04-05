@@ -265,7 +265,7 @@ export default {
         const store = useStore()
 
         let showSteps = ref(false)
-        let imagePreview = ref('foo')
+        let imagePreview = ref(null)
         let image = null
 
         const submitted = ref(false)
@@ -300,7 +300,6 @@ export default {
             state.ingredients = []
             state.category = ''
             state.serves = 1
-
             image = null
             imagePreview.value = null
             submitted.value = false
@@ -334,7 +333,6 @@ export default {
             rules, 
             recipe_id, 
             imagePreview, 
-            image, 
             submitted, 
             showSteps, 
             filteredCategories, 
