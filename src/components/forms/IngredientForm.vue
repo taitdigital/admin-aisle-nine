@@ -1,16 +1,16 @@
 <script lang="ts">
-import { reactive, ref } from 'vue';
-import { required } from '@vuelidate/validators';
-import { useVuelidate } from '@vuelidate/core';
-import UploadService from '../../services/upload.service';
-import { IMG_URL } from '../../constants/index';
+import { reactive, ref } from 'vue'
+import { required } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
+import UploadService from '../../services/upload.service'
+import ImageUploadForm from './ImageUploadForm.vue'
 
 export default {
     props: ['existingIngredient'],
+    components: { ImageUploadForm },
     methods: {
-        handleImageSelect(event) {
-            this.imagePreview = URL.createObjectURL(event.target.files[0])
-            this.image = event.target.files[0]
+        handleImageSelect(imageData) {
+            this.image = imageData
         },
         handleSearch() {
             this.$store.dispatch('ingredients/search', this.state.name)
@@ -26,7 +26,7 @@ export default {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
                 } else {
                     this.$toast.add({severity:'success', summary: 'Create success', detail: r, life: 3000})
-                    this.uploadImage(r.category_id);
+                    this.uploadImage(r.data.ingredient_id);
                 }
             },
             (error) => {
@@ -42,7 +42,7 @@ export default {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
                 } else {
                     this.$toast.add({severity:'success', summary: 'Edit success', detail: r, life: 3000})
-                    this.uploadImage(r.category_id)
+                    this.uploadImage(r.data.ingredient_id)
                 }
 
             },
@@ -81,8 +81,13 @@ export default {
         }
     },
     setup(props) {
-        let imagePreview = ref('')
-        let image = ''
+        const uid = function(){
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+        const instanceId = uid()
+
+        let imagePreview = null
+        let image = null
         
         const submitted = ref(false)
         const state = reactive({
@@ -105,8 +110,7 @@ export default {
             state.vegan = props.existingIngredient.vegan
             state.diabetes_ok = props.existingIngredient.diabetes_ok
             state.gluten_free = props.existingIngredient.gluten_free
-
-            imagePreview.value = `${IMG_URL}/${props.existingIngredient.image}`
+            imagePreview = props.existingIngredient.image
         }
 
         const rules: any = {
@@ -119,12 +123,9 @@ export default {
             gluten_free: {}
         }
 
-        const uid = () => {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
-        }
+        const v$ = useVuelidate(rules, state)
 
-        const v$ = useVuelidate(rules, state);
-        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, uid }
+        return { v$, state, rules, ingredient_id, imagePreview, image, submitted, props, instanceId }
     }
 }
 </script>
@@ -141,17 +142,17 @@ export default {
                             <div class="p-float-label p-input-icon-right">
                                 <i class="pi pi-search" />
                                 <InputText 
-                                    id="name"
+                                    :id="`name-${instanceId}`"
                                     @input="handleSearch()" 
                                     v-model="v$.name.$model" 
                                     :class="{'p-invalid':v$.name.$invalid && submitted}" 
                                     aria-describedby="name-error"
                                 />
-                                <label for="name" :class="{'p-error':v$.name.$invalid && submitted}">Ingredient Name *</label>
+                                <label :for="`name-${instanceId}`" :class="{'p-error':v$.name.$invalid && submitted}">Ingredient Name *</label>
                             </div>
 
                             <span v-if="v$.name.$error && submitted">
-                                <span id="name-error" v-for="(error, index) of v$.name.$errors" :key="index">
+                                <span :id="`name-error-${instanceId}`" v-for="(error, index) of v$.name.$errors" :key="index">
                                 <small class="p-error">{{error.$message}}</small>
                                 </span>
                             </span>
@@ -163,7 +164,8 @@ export default {
 
                         <div class="field pt-3">
                             <div class="p-float-label">
-                                <Textarea id="description" 
+                                <Textarea 
+                                    :id="`description-${instanceId}`" 
                                     v-model="v$.description.$model" 
                                     :class="{'p-invalid':v$.description.$invalid && submitted}" 
                                     aria-describedby="description-error" 
@@ -171,11 +173,11 @@ export default {
                                     rows="3" 
                                     cols="30" 
                                 />
-                                <label for="description" :class="{'p-error':v$.description.$invalid && submitted}">Ingredient Description *</label>
+                                <label :for="`description-${instanceId}`" :class="{'p-error':v$.description.$invalid && submitted}">Ingredient Description *</label>
                             </div>
 
                             <span v-if="v$.description.$error && submitted">
-                                <span id="description-error" v-for="(error, index) of v$.description.$errors" :key="index">
+                                <span :id="`description-error-${instanceId}`" v-for="(error, index) of v$.description.$errors" :key="index">
                                 <small class="p-error">{{error.$message}}</small>
                                 </span>
                             </span>
@@ -185,24 +187,11 @@ export default {
                             </small>
                         </div>
 
-                        <div class="flex justify-content-end">
-                            <div class="upload-preview">
-                                <span v-if="imagePreview">
-                                    <img :src="imagePreview" width="36" height="36"/>
-                                </span>                    
-                            </div>
-
-                            <div class="file-input">
-                                <input type="file" id="file-ingredient" class="file" v-on:change="handleImageSelect">
-                                <label for="file-ingredient" class="p-button p-button-outlined file-button">
-                                    <span class="p-button-label" v-if="!image">Upload Image</span>
-                                    <span class="p-button-label" v-if="image">{{ image.name }}</span>
-                                </label>
-                            </div>
+                        <div class="field pt-3">
+                            <ImageUploadForm :existingImage="imagePreview" @imageSelected="handleImageSelect" />
                         </div>
 
-                        <Button type="submit" :label="(existingIngredient) ? 'Update': 'Create'" class="mt-3 p-button-rounded" />
-
+                        <Button type="submit" :label="(existingIngredient) ? 'Update and Close': 'Create'" class="mt-3 p-button-rounded" />
                     </div>
 
                     <div class="ml-2 border-1 px-4 py-4 border-round border-gray-400 flex-grow-1">
@@ -236,40 +225,3 @@ export default {
         <Divider />
     </div>
 </template>
-
-<style scoped>
-    .form-max-width {
-        max-width: 266px;
-    }
-
-    .file {
-        opacity: 0;
-        width: 0.1px;
-        height: 0.1px;
-        position: absolute;
-    }
-
-    .file-input {
-        width: calc(100% - 40px);
-        margin-left: 4px;
-    }
-    .file-button {
-        width: 100%;
-    }
-
-    .file-button span {
-        width: 100%;
-        white-space: nowrap;
-        overflow: hidden;
-        display: inline-block;
-        text-overflow: ellipsis;
-    }
-
-    .upload-preview {
-        width: 36px;
-        height:36px;
-        overflow: hidden;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-    }
-</style>

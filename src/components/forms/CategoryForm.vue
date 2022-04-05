@@ -3,15 +3,15 @@ import { reactive, ref } from 'vue'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import UploadService from '../../services/upload.service'
-import { IMG_URL } from '../../constants/index'
+import ImageUploadForm from './ImageUploadForm.vue'
 
 export default {
     props: ['existingCategory'],
     emits: ['onClose'],
+    components: { ImageUploadForm },    
     methods: {
-        handleImageSelect(event) {
-            this.imagePreview = URL.createObjectURL(event.target.files[0])
-            this.image = event.target.files[0]
+        handleImageSelect(imageData) {
+            this.image = imageData
         },
         handleSearch() {
             this.$store.dispatch('categories/search', this.state.name)
@@ -31,7 +31,7 @@ export default {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
                 } else {
                     this.$toast.add({severity:'success', summary: 'Create success', detail: r, life: 3000})
-                    this.uploadImage(r.category_id);
+                    this.uploadImage(r.data.category_id);
                 }
             },
             (error) => {
@@ -39,8 +39,6 @@ export default {
             })
         },
         edit(id) {
-            console.warn('edit', id)
-
             this.$store.dispatch('categories/edit', { 
                 id: id, 
                 payload: { 
@@ -53,7 +51,7 @@ export default {
                     this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
                 } else {
                     this.$toast.add({severity:'success', summary: 'Edit success', detail: r, life: 3000})
-                    this.uploadImage(r.category_id)
+                    this.uploadImage(r.data.category_id)
                     this.$emit('onClose')
                 }
 
@@ -94,8 +92,14 @@ export default {
         }
     },
     setup(props) {
-        let imagePreview = ref('')
-        let image = ''
+        const uid = function(){
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+        const instanceId = uid()
+
+        let imagePreview = null
+        let image = null
+
         const submitted = ref(false)
         const state = reactive({
             name: '',
@@ -109,7 +113,7 @@ export default {
             state.name = props.existingCategory.name
             state.description = props.existingCategory.description
             state.type = props.existingCategory.type
-            imagePreview.value = `${IMG_URL}/${props.existingCategory.image}`
+            imagePreview = props.existingCategory.image
         }
 
         const rules: any = {
@@ -119,7 +123,7 @@ export default {
         }
 
         const v$ = useVuelidate(rules, state);
-        return { v$, state, rules, category_id, imagePreview, image, submitted }
+        return { v$, state, rules, category_id, imagePreview, image, submitted, instanceId }
     }
 }
 </script>
@@ -133,17 +137,17 @@ export default {
                     <div class="p-float-label p-input-icon-right">
                         <i class="pi pi-search" />
                         <InputText 
-                            id="name"
+                            :id="`name-${instanceId}`"
                             @input="handleSearch()" 
                             v-model="v$.name.$model" 
                             :class="{'p-invalid':v$.name.$invalid && submitted}" 
                             aria-describedby="name-error"
                         />
-                        <label for="name" :class="{'p-error':v$.name.$invalid && submitted}">Category Name *</label>
+                        <label :for="`name-${instanceId}`" :class="{'p-error':v$.name.$invalid && submitted}">Category Name *</label>
                     </div>
 
                     <span v-if="v$.name.$error && submitted">
-                        <span id="name-error" v-for="(error, index) of v$.name.$errors" :key="index">
+                        <span :id="`name-error-${instanceId}`" v-for="(error, index) of v$.name.$errors" :key="index">
                         <small class="p-error">{{error.$message}}</small>
                         </span>
                     </span>
@@ -155,7 +159,8 @@ export default {
 
                 <div class="field pt-3">
                     <div class="p-float-label">
-                        <Textarea id="description" 
+                        <Textarea 
+                            :id="`description-${instanceId}`"
                             v-model="v$.description.$model" 
                             :class="{'p-invalid':v$.description.$invalid && submitted}" 
                             aria-describedby="description-error" 
@@ -163,11 +168,11 @@ export default {
                             rows="3" 
                             cols="30" 
                         />
-                        <label for="description" :class="{'p-error':v$.description.$invalid && submitted}">Category Description *</label>
+                        <label :for="`description-${instanceId}`" :class="{'p-error':v$.description.$invalid && submitted}">Category Description *</label>
                     </div>
 
                     <span v-if="v$.description.$error && submitted">
-                        <span id="description-error" v-for="(error, index) of v$.description.$errors" :key="index">
+                        <span :id="`description-error-${instanceId}`" v-for="(error, index) of v$.description.$errors" :key="index">
                         <small class="p-error">{{error.$message}}</small>
                         </span>
                     </span>
@@ -188,20 +193,8 @@ export default {
                     </div>
                 </div>    
 
-                <div class="flex justify-content-end">
-                    <div class="upload-preview">
-                        <span v-if="imagePreview">
-                            <img :src="imagePreview" width="36" height="36"/>
-                        </span>
-                    </div>
-
-                    <div class="file-input">
-                        <input type="file" id="file-category" class="file" v-on:change="handleImageSelect">
-                        <label for="file-category" class="p-button p-button-outlined file-button">
-                            <span class="p-button-label" v-if="!image">Upload Image</span>
-                            <span class="p-button-label" v-if="image">{{ image.name }}</span>
-                        </label>
-                    </div>
+                <div class="field pt-3">
+                    <ImageUploadForm :existingImage="imagePreview" @imageSelected="handleImageSelect" />
                 </div>
 
                 <Button type="submit" :label="(existingCategory) ? 'Update and Close': 'Create'" class="mt-3 p-button-rounded" />
