@@ -86,7 +86,7 @@ export default {
         </div>
 
         <Dialog header="Edit Category" v-model:visible="displayEdit" :style="{width: '50vw'}">
-            <CategoryForm :existingCategory="selectedCategory" />
+            <CategoryForm :existingCategory="selectedCategory" @onClose="displayEdit = false" />
         </Dialog>
 	</div>
 </template>

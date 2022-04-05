@@ -1,80 +1,84 @@
 <script lang="ts">
-import { reactive, ref } from 'vue';
-import { required } from '@vuelidate/validators';
-import { useVuelidate } from '@vuelidate/core';
-import UploadService from '../../services/upload.service';
-import { IMG_URL } from '../../constants/index';
+import { reactive, ref } from 'vue'
+import { required } from '@vuelidate/validators'
+import { useVuelidate } from '@vuelidate/core'
+import UploadService from '../../services/upload.service'
+import { IMG_URL } from '../../constants/index'
 
 export default {
     props: ['existingCategory'],
+    emits: ['onClose'],
     methods: {
         handleImageSelect(event) {
             this.imagePreview = URL.createObjectURL(event.target.files[0])
             this.image = event.target.files[0]
-
-            console.warn('handleImageSelect', this.imagePreview);
         },
         handleSearch() {
             this.$store.dispatch('categories/search', this.state.name)
         },
         handleSubmit(isFormValid, id = null) {
-            this.submitted = true;
+            this.submitted = true
             if (!isFormValid) { return }
             if (!id) { this.create() } else { this.edit(id) }
         },
         create() {
             this.$store.dispatch('categories/create', {
                 'name': this.state.name,
-                'description': this.state.description    
+                'description': this.state.description,
+                'type': this.state.type    
             }).then((r) => {
                 if (r.errors) {
-                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
+                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
                 } else {
                     this.$toast.add({severity:'success', summary: 'Create success', detail: r, life: 3000})
                     this.uploadImage(r.category_id);
                 }
             },
             (error) => {
-                this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
+                this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000})
             })
         },
         edit(id) {
+            console.warn('edit', id)
+
             this.$store.dispatch('categories/edit', { 
                 id: id, 
                 payload: { 
                     'name': this.state.name,
-                    'description': this.state.description
+                    'description': this.state.description,
+                    'type': this.state.type
                 }         
             }).then((r) => {
                 if (r.errors) {
-                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000});
+                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
                 } else {
                     this.$toast.add({severity:'success', summary: 'Edit success', detail: r, life: 3000})
                     this.uploadImage(r.category_id)
+                    this.$emit('onClose')
                 }
 
             },
             (error) => {
-                this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
+                this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000})
             }) 
         },
         uploadImage(id) {
             if (this.image) {
                 const uploadService = new UploadService();
 
-                this.$toast.add({severity:'info', summary: 'Uploading image', detail: this.image.name, life: 3000});
+                this.$toast.add({severity:'info', summary: 'Uploading image', detail: this.image.name, life: 3000})
                 
                 uploadService.upload({
                     entity_id: id,
                     entity_type: 'Category',
                     file: this.image
                 }).then((r) => {
-                    this.$toast.add({severity:'success', summary: 'Upload successful', detail: r, life: 3000});
+                    this.$toast.add({severity:'success', summary: 'Upload successful', detail: r, life: 3000})
                     this.clearForm();
                     this.$store.dispatch('categories/index')
                 },
                 (error) => {
-                    this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000});
+                    this.$toast.add({severity:'error', summary: 'Error: ', detail: error, life: 30000})
                 })
             } else {
                 this.clearForm();
@@ -95,20 +99,23 @@ export default {
         const submitted = ref(false)
         const state = reactive({
             name: '',
-            description: ''
+            description: '',
+            type: 'Recipe'
         })
 
-        const category_id = (props.existingCategory) ? props.existingCategory.category_id : null;
+        const category_id = (props.existingCategory) ? props.existingCategory.category_id : null
 
         if (props.existingCategory) {
             state.name = props.existingCategory.name
             state.description = props.existingCategory.description
+            state.type = props.existingCategory.type
             imagePreview.value = `${IMG_URL}/${props.existingCategory.image}`
         }
 
         const rules: any = {
             name: { required },
-            description: { required }
+            description: { required },
+            type: {}
         }
 
         const v$ = useVuelidate(rules, state);
@@ -170,6 +177,17 @@ export default {
                     </small>
                 </div>
 
+                <div class="field flex justify-content-center">
+                    <div class="field-radiobutton pr-2">
+                        <RadioButton id="ingredient_category" name="Ingredient" value="Ingredient" v-model="v$.type.$model" />
+                        <label for="ingredient_category">Ingredient</label>
+                    </div>
+                    <div class="field-radiobutton pl-2">
+                        <RadioButton id="recipe_category" name="Recipe" value="Recipe" v-model="v$.type.$model" />
+                        <label for="recipe_category">Recipe</label>
+                    </div>
+                </div>    
+
                 <div class="flex justify-content-end">
                     <div class="upload-preview">
                         <span v-if="imagePreview">
@@ -186,7 +204,7 @@ export default {
                     </div>
                 </div>
 
-                <Button type="submit" :label="(existingCategory) ? 'Update': 'Create'" class="mt-3 p-button-rounded" />
+                <Button type="submit" :label="(existingCategory) ? 'Update and Close': 'Create'" class="mt-3 p-button-rounded" />
             </form>
         </div>
         <Divider />
