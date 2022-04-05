@@ -1,5 +1,5 @@
 <script lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 
 import { IMG_URL } from '../../constants/index';
 
@@ -19,11 +19,11 @@ export default {
         }
         const instanceId = uid()
 
-        let imagePreview = ref(null)
+        let imagePreview = (props.existingImage) ? `${IMG_URL}/${props.existingImage}` : null
         let imageData = ref(null)
 
         watch(() => props.existingImage, function() {
-            imagePreview.value = (props.existingImage) ? `${IMG_URL}/${props.existingImage}` : null
+            imagePreview = (props.existingImage) ? `${IMG_URL}/${props.existingImage}` : null
         })
 
         return { imagePreview, imageData, instanceId } 
