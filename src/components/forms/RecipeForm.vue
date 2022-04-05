@@ -4,10 +4,10 @@ import { useStore } from 'vuex'
 import { required } from '@vuelidate/validators'
 import { useVuelidate } from '@vuelidate/core'
 import UploadService from '../../services/upload.service'
-import { IMG_URL } from '../../constants/index'
 import RecipeIngredientList from '../RecipeIngredientList.vue'
 import StepForm from './StepForm.vue'
 import StepList from '../StepList.vue'
+import ImageUploadForm from './ImageUploadForm.vue'
 
 export default {
     props: ['existingRecipeId'],
@@ -15,9 +15,13 @@ export default {
     components: {
         RecipeIngredientList,
         StepForm,
-        StepList
+        StepList,
+        ImageUploadForm
     },
     methods: {
+        handleImageSelect(imageData) {
+            this.image = imageData
+        },
         toggleStepDialog(selectedStep = null) {
             this.existingStep = selectedStep
             this.displayStepEdit = !this.displayStepEdit
@@ -31,13 +35,9 @@ export default {
                 this.state.ingredients = r.recipe_ingredients.map(i => ({ 'label': i.ingredient.name, 'value': i.ingredient.ingredient_id }))
                 this.category = this.filteredCategories.find(i => (i.value === r.category_id))
                 this.image = r.image
-                this.imagePreview = IMG_URL + '/' + r.image
+                this.imagePreview = r.image
                 this.$emit('recipeLoading', false)
             });
-        },
-        handleImageSelect(event) {
-            this.imagePreview = URL.createObjectURL(event.target.files[0])
-            this.image = event.target.files[0]
         },
         handleSearch() {
             this.$store.dispatch('recipes/search', this.state.name)
@@ -134,7 +134,7 @@ export default {
                         detail: 'Recipe ' + this.state.name + ', was updated.', 
                         life: 3000 
                     })
-                    this.uploadImage(r.category_id)
+                    this.uploadImage(r.recipe_id)
                 }
             },
             (error) => {
@@ -265,10 +265,11 @@ export default {
         const store = useStore()
 
         let showSteps = ref(false)
-        let imagePreview = ref(null)
-        let image = ''
+        let imagePreview = ref('foo')
+        let image = null
 
         const submitted = ref(false)
+       
         const filteredCategories = ref([])
         const filteredIngredients = ref([])
         const displayStepEdit = ref(false)
@@ -300,8 +301,8 @@ export default {
             state.category = ''
             state.serves = 1
 
-            image = ''
-            imagePreview = null
+            image = null
+            imagePreview.value = null
             submitted.value = false
             showSteps.value = true
         }
@@ -320,9 +321,7 @@ export default {
                     state.description = r.description
                     state.ingredients = r.recipe_ingredients.map(i => ({ 'label': i.ingredient.name, 'value': i.ingredient.ingredient_id }))
                     state.category = filteredCategories.value.find(i => (i.value === r.category_id))
-                    
-                    image = r.image
-                    imagePreview = (r.image) ? IMG_URL + '/' + r.image : null
+                    imagePreview.value = (r.image) ? r.image : null
                     emit('recipeLoading', false)
                 })
             }
@@ -431,20 +430,8 @@ export default {
 
                     </div>
 
-                    <div class="flex justify-content-end">
-                        <div class="upload-preview">
-                            <span v-if="imagePreview">
-                                <img :src="imagePreview" width="36" height="36"/>
-                            </span>                    
-                        </div>
-
-                        <div class="file-input">
-                            <input type="file" id="file-recipe" class="file" v-on:change="handleImageSelect">
-                            <label for="file-recipe" class="p-button p-button-outlined file-button">
-                                <span class="p-button-label" v-if="!image">Upload Image</span>
-                                <span class="p-button-label" v-if="image">{{ image.name ?? 'Upload Image' }}</span>
-                            </label>
-                        </div>
+                    <div class="field pt-3">
+                        <ImageUploadForm :existingImage="imagePreview" @imageSelected="handleImageSelect" />
                     </div>
 
                     <div class="field pt-5">
