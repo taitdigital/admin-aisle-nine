@@ -20,6 +20,7 @@ export default {
     },
     methods: {
         handleImageSelect(imageData) {
+            this.formDirty = true
             this.image = imageData
         },
         toggleStepDialog(selectedStep = null) {
@@ -40,6 +41,7 @@ export default {
             });
         },
         handleSearch() {
+            this.formDirty = true
             this.$store.dispatch('recipes/search', this.state.name)
         },
         handleAutoEdit(isFormValid) {
@@ -82,7 +84,7 @@ export default {
                         detail: 'An error has occurred, see console for details', 
                         life: 3000
                     })
-                    console.warn('debug:: ', r.errors)
+                    console.error('debug:: ', r.errors)
                 } else {
                     this.currentRecipe = r
 
@@ -92,7 +94,6 @@ export default {
                         detail: 'Recipe: ' + this.state.name + ', was created.', 
                         life: 3000
                     })
-                    console.warn('debug:: ', r)
 
                     this.$emit("recipeCreated", this.currentRecipe)
                     this.uploadImage(r.recipe_id)
@@ -134,6 +135,7 @@ export default {
                         detail: 'Recipe ' + this.state.name + ', was updated.', 
                         life: 3000 
                     })
+                    this.formDirty = false
                     this.uploadImage(r.recipe_id)
                 }
             },
@@ -269,6 +271,7 @@ export default {
         let image = null
 
         const submitted = ref(false)
+        const formDirty = ref(false)
        
         const filteredCategories = ref([])
         const filteredIngredients = ref([])
@@ -342,7 +345,8 @@ export default {
             store, 
             displayStepEdit, 
             existingStep,
-            clearForm 
+            clearForm,
+            formDirty 
         }
     }
 }
@@ -387,7 +391,8 @@ export default {
                                 aria-describedby="description-error" 
                                 :autoResize="true" 
                                 rows="3" 
-                                cols="30" 
+                                cols="30"
+                                @input="formDirty = true" 
                             />
                             <label for="description" :class="{'p-error':v$.description.$invalid && submitted}">Recipe Description *</label>
                         </div>
@@ -493,7 +498,16 @@ export default {
                 
             <div class="flex justify-content-between">
                 <Button type="button" :label="'Create Step'" @click="toggleStepDialog()" class="p-button-rounded p-button-outlined" />
-                <Button type="button" :label="'Update'" class="p-button-rounded" @click="handleSubmit(true, currentRecipe.recipe_id)" />
+                <div class="flex align-items-center">
+                    <div v-if="formDirty" class="flex align-items-center px-2" style="color: red;">
+                        unsaved work
+                        <i class="pi pi-exclamation-circle pl-2"></i> 
+                    </div>
+                    <div v-if="!formDirty" class="flex align-items-center px-2" style="color: green;">
+                        <i class="pi pi-check pl-2"></i> 
+                    </div>
+                    <Button type="button" :label="'Update'" class="p-button-rounded" @click="handleSubmit(true, currentRecipe.recipe_id)" />
+                </div>
             </div>
 
             <Divider />
