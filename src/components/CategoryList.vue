@@ -35,7 +35,21 @@ export default {
                 icon: 'pi pi-exclamation-triangle',
                 accept: () => {
                     this.$store.dispatch("categories/delete", id).then((r) => {
-                            this.$toast.add({severity:'success', summary: 'Deleted successful', detail: r, life: 3000})
+                            if (r.exception) {
+                                this.$toast.add({
+                                    severity:'error', 
+                                    summary: 'Delete Failed', 
+                                    detail: r.message, 
+                                    life: 3000
+                                })
+                            } else {
+                                this.$toast.add({
+                                    severity:'success', 
+                                    summary: 'Delete Successful', 
+                                    detail: r.data.name + ' was deleted successfully', 
+                                    life: 3000
+                                })
+                            }
                             this.$store.dispatch("categories/index")
                         },
                         (error) => {

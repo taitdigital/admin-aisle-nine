@@ -21,7 +21,7 @@ export default {
     },
     computed: {
         ingredients() {
-            return this.$store.state.ingredients.ingredients;
+            return this.$store.state.ingredients.ingredients
         }
     },
     methods: {
@@ -36,11 +36,26 @@ export default {
                 icon: 'pi pi-exclamation-triangle',
                 accept: () => {
                     this.$store.dispatch("ingredients/delete", id).then((r) => {
-                            this.$toast.add({severity:'success', summary: 'Delete Successful', detail: r, life: 3000})
+                            if (r.exception) {
+                                this.$toast.add({
+                                    severity:'error', 
+                                    summary: 'Delete Failed', 
+                                    detail: r.message, 
+                                    life: 3000
+                                })
+                            } else {
+                                this.$toast.add({
+                                    severity:'success', 
+                                    summary: 'Delete Successful', 
+                                    detail: r.data.name + ' was deleted successfully', 
+                                    life: 3000
+                                })
+                            }
+
                             this.$store.dispatch("ingredients/index")
                         },
                         (error) => {
-                        console.warn(error);
+                            console.warn(error)
                         }
                     )
                 },
