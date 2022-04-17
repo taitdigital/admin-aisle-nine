@@ -71,6 +71,7 @@ export default {
                 } else {
                     this.$toast.add({severity:'success', summary: 'Edit success', detail: r, life: 3000})
                     this.uploadImage(r.data.recipe_step_id)
+                    this.$emit('onClose')
                 }
 
             },
@@ -236,7 +237,7 @@ export default {
                     </small>
                 </div>
 
-                <Button type="submit" :label="(existingStep) ? 'Update': 'Create'" class="mt-3 p-button-rounded" />
+                <Button type="submit" :label="(existingStep) ? 'Update and Close': 'Create'" class="mt-3 p-button-rounded" />
             </form>
         </div>
         <Divider />

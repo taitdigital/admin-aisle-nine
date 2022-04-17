@@ -515,7 +515,7 @@ export default {
             <StepList :recipe="currentRecipe" @selectStep="toggleStepDialog" /> 
 
             <Dialog :header="(existingStep) ? 'Update Step': 'Create Step'" v-model:visible="displayStepEdit" :style="{width: '50vw'}">
-                <StepForm :recipe="currentRecipe" :existingStep="existingStep" :stepCount="0" />
+                <StepForm :recipe="currentRecipe" :existingStep="existingStep" :stepCount="0" @onClose="displayStepEdit = false" />
             </Dialog>
 
         </div>

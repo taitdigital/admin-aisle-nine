@@ -104,7 +104,7 @@ export default {
         </div>
 
         <Dialog header="Edit Ingredient" v-model:visible="displayEdit" :style="{width: '50vw'}">
-            <IngredientForm :existingIngredient="selectedIngredient" />
+            <IngredientForm :existingIngredient="selectedIngredient" @onClose="displayEdit = false" />
         </Dialog>
 	</div>
 </template>

@@ -2,7 +2,7 @@ import { API_URL, getApiToken } from '../constants/index'
 
 class RecipeStepService {
   index(recipeId) {
-    return fetch(`${API_URL}/recipes/steps/${recipeId}`, {
+    return fetch(`${API_URL}/recipes/recipe-steps/${recipeId}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -24,7 +24,7 @@ class RecipeStepService {
   }
 
   show(recipeId, stepId: number) {
-    return fetch(API_URL + '/recipes/'+ recipeId +'/steps/' + stepId, {
+    return fetch(API_URL + '/recipes/recipe-steps/' + stepId, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -43,7 +43,7 @@ class RecipeStepService {
   }
 
   create(payload: any) {
-    return fetch(API_URL + '/recipes/steps', {
+    return fetch(API_URL + '/recipes/recipe-steps', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ class RecipeStepService {
   }
 
   edit(id: number, payload: any) {
-    return fetch(API_URL + '/recipes/steps/' + id, {
+    return fetch(API_URL + '/recipes/recipe-steps/' + id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ class RecipeStepService {
   }
 
   delete(id: number) {
-    return fetch(API_URL + '/recipes/steps/' + id, {
+    return fetch(API_URL + '/recipes/recipe-steps/' + id, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

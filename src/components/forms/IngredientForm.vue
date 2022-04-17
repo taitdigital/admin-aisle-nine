@@ -39,10 +39,21 @@ export default {
                 payload: this.state        
             }).then((r) => {
                 if (r.errors) {
-                    this.$toast.add({severity:'error', summary: 'Error: ', detail: r.errors, life: 30000})
+                    this.$toast.add({
+                        severity:'error', 
+                        summary: 'Error: ', 
+                        detail: r.errors, 
+                        life: 30000
+                    })
                 } else {
-                    this.$toast.add({severity:'success', summary: 'Edit success', detail: r, life: 3000})
+                    this.$toast.add({
+                        severity:'success', 
+                        summary: 'Edit success', 
+                        detail: r.data.name, 
+                        life: 3000
+                    })
                     this.uploadImage(r.data.ingredient_id)
+                    this.$emit('onClose')
                 }
 
             },
