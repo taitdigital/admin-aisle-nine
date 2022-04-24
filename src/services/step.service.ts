@@ -1,110 +1,31 @@
-import { API_URL, getApiToken } from '../constants/index'
+import ApiService from './api.service'
+import { API_URL } from '../constants/index'
 
-class RecipeStepService {
+
+class RecipeStepService extends ApiService {
+  constructor() {
+    super('recipes/recipe-steps');
+  }
+
+  // @ts-ignore: i dunno why ts doesn't like this overload
   index(recipeId) {
     return fetch(`${API_URL}/recipes/recipe-steps/${recipeId}`, {
         method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ' + getApiToken(),
-        }
+        headers: this.headers
       })
       .then(response => response.json())
       .then(data => {
         if (data) {
-            localStorage.setItem('steps', JSON.stringify(data));
+            localStorage.setItem('steps', JSON.stringify(data))
         }
-        return data;
+        return data
       })
       .catch((error) => {
-        console.error('Error:', error);
-        return error;
-      });
+        console.error('Error:', error)
+        return error
+      })
 
   }
-
-  show(recipeId, stepId: number) {
-    return fetch(API_URL + '/recipes/recipe-steps/' + stepId, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ' + getApiToken(),        
-        },
-      })
-      .then(response => response.json())
-      .then(data => {
-        return data;
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        return error;
-      });
-
-  }
-
-  create(payload: any) {
-    return fetch(API_URL + '/recipes/recipe-steps', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ' + getApiToken(),
-        },
-        body: JSON.stringify(payload),
-      })
-      .then(response => response.json())
-      .then(data => {
-        return data;
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        return error;
-      });
-
-  }
-
-  edit(id: number, payload: any) {
-    return fetch(API_URL + '/recipes/recipe-steps/' + id, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ' + getApiToken(),
-        },
-        body: JSON.stringify(payload),
-      })
-      .then(response => response.json())
-      .then(data => {
-        return data;
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        return error;
-      });
-
-  }
-
-  delete(id: number) {
-    return fetch(API_URL + '/recipes/recipe-steps/' + id, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ' + getApiToken(),
-        },
-        body: JSON.stringify({}),
-      })
-      .then(response => response.json())
-      .then(data => {
-        return data;
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        return error;
-      });
-
-  }
-
 }
 
-export default new RecipeStepService();
+export default new RecipeStepService()

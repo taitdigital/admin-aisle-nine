@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'http://localhost:8000/api'
 
 class AuthService {
   login(user: any) {
@@ -13,21 +13,21 @@ class AuthService {
       .then(response => response.json())
       .then(data => {
         if (data.token) {
-            localStorage.setItem('user', JSON.stringify(data));
+            localStorage.setItem('user', JSON.stringify(data))
         }
 
-        return data;
+        return data
       })
       .catch((error) => {
-        console.error('Error:', error);
-        return error;
-      });
+        console.error('Error:', error)
+        return error
+      })
 
   }
 
   logout() {
-    const user = localStorage.getItem('user');
-    const BEARER_TOKEN = (user) ? JSON.parse(user).token : null;
+    const user = localStorage.getItem('user')
+    const BEARER_TOKEN = (user) ? JSON.parse(user).token : null
 
     return fetch(API_URL + '/logout', {
         method: 'POST',
@@ -39,16 +39,16 @@ class AuthService {
       })
       .then(response => response.json())
       .then(data => {
-        localStorage.removeItem('user');
-        return data;
+        localStorage.removeItem('user')
+        return data
       })
       .catch((error) => {
-        console.error('Error:', error);
-        return error;
-      });
+        console.error('Error:', error)
+        return error
+      })
 
   }
 
 }
 
-export default new AuthService();
+export default new AuthService()

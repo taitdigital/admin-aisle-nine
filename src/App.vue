@@ -39,6 +39,11 @@ export default {
                    label:'Manage Recipes',
                    icon:'pi pi-fw pi-file',
                    to: '/recipes'
+                },
+                {
+                   label:'Manage Uesrs',
+                   icon:'pi pi-fw pi-users',
+                   to: '/users'
                 }
             ]
 
